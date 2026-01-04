@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="yohaku">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="yohaku 2026 - 習慣管理アプリ">
+  <title>yohaku 2026</title>
+  
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCBmaWxsPSIjNEY0NkU1IiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIi8+PHRleHQgeD0iNTAiIHk9IjY1IiBmb250LXNpemU9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+5L2ZPC90ZXh0Pjwvc3ZnPg==">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: 'Zen Kaku Gothic New', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafaf9;
+      color: #1c1917;
+      min-height: 100vh;
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .font-serif { font-family: 'Noto Serif JP', serif; }
+    
+    /* ヘッダー */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e7e5e4;
+      padding: env(safe-area-inset-top) 16px 12px;
+    }
+    
+    .header-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    
+    .logo-text h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .logo-text span {
+      font-size: 10px;
+      color: #a8a29e;
+    }
+    
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff7ed;
+      color: #ea580c;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    
+    /* メインコンテンツ */
+    .main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 100px;
+    }
+    
+    /* カード */
+    .card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #f5f5f4;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f5f5f4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .card-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .card-icon.amber { background: #fef3c7; color: #f59e0b; }
+    .card-icon.indigo { background: #e0e7ff; color: #6366f1; }
+    .card-icon.rose { background: #ffe4e6; color: #f43f5e; }
+    .card-icon.teal { background: #ccfbf1; color: #14b8a6; }
+    
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #44403c;
+    }
+    
+    .card-percent {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    .card-percent.amber { color: #f59e0b; }
+    .card-percent.indigo { color: #6366f1; }
+    
+    /* 習慣リスト */
+    .habit-list {
+      list-style: none;
+    }
+    
+    .habit-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #fafaf9;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .habit-item:last-child {
+      border-bottom: none;
+    }
+    
+    .habit-item:active {
+      background: #fafaf9;
+    }
+    
+    .habit-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #d6d3d1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    
+    .habit-check.done {
+      border-color: transparent;
+    }
+    
+    .habit-check.done.amber { background: #f59e0b; }
+    .habit-check.done.indigo { background: #6366f1; }
+    .habit-check.done.green { background: #22c55e; }
+    
+    .habit-check svg {
+      width: 14px;
+      height: 14px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .habit-check.done svg {
+      opacity: 1;
+    }
+    
+    .habit-info {
+      flex: 1;
+    }
+    
+    .habit-name {
+      font-size: 14px;
+      color: #44403c;
+      transition: all 0.2s;
+    }
+    
+    .habit-name.done {
+      color: #a8a29e;
+      text-decoration: line-through;
+    }
+    
+    .habit-time {
+      font-size: 12px;
+      color: #a8a29e;
+    }
+    
+    /* 日付ナビ */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      margin-bottom: 16px;
+    }
+    
+    .date-nav button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a8a29e;
+    }
+    
+    .date-nav button:active {
+      background: #f5f5f4;
+    }
+    
+    .date-display {
+      text-align: center;
+    }
+    
+    .date-display .date {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1c1917;
+    }
+    
+    .date-display .day {
+      font-size: 16px;
+      color: #a8a29e;
+    }
+    
+    .today-badge {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #6366f1;
+      background: #e0e7ff;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    
+    /* テーマカード */
+    .theme-card {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 16px;
+      padding: 20px;
+      color: white;
+      margin-bottom: 16px;
+    }
+    
+    .theme-card-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .theme-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .theme-name {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    
+    .theme-quote {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 12px;
+      font-style: italic;
+    }
+    
+    .theme-percent {
+      text-align: right;
+    }
+    
+    .theme-percent .num {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .theme-percent .label {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+    
+    /* 健康記録 */
+    .health-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+    }
+    
+    .health-item {
+      background: #fafaf9;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    
+    .health-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #78716c;
+      margin-bottom: 8px;
+    }
+    
+    .health-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .health-input {
+      width: 100%;
+      background: white;
+      border: 1px solid #e7e5e4;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      color: #44403c;
+    }
+    
+    .health-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+    
+    .health-unit {
+      font-size: 12px;
+      color: #a8a29e;
+      width: 24px;
+    }
+    
+    /* メモ */
+    .note-textarea {
+      width: 100%;
+      background: #fafaf9;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      color: #44403c;
+      resize: none;
+      height: 80px;
+      font-family: inherit;
+    }
+    
+    .note-textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+    }
+    
+    .note-textarea::placeholder {
+      color: #a8a29e;
+    }
+    
+    /* ボトムナビ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid #e7e5e4;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .bottom-nav-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+    }
+    
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #a8a29e;
+      transition: color 0.2s;
+    }
+    
+    .nav-btn.active {
+      color: #6366f1;
+    }
+    
+    .nav-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .nav-btn span {
+      font-size: 10px;
+      margin-top: 2px;
+    }
+    
+    /* 週間ビュー */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    
+    .week-day {
+      background: white;
+      border: 1px solid #f5f5f4;
+      border-radius: 12px;
+      padding: 10px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .week-day:active {
+      transform: scale(0.95);
+    }
+    
+    .week-day.today {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: white;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+    
+    .week-day .day-name {
+      font-size: 10px;
+      color: #a8a29e;
+    }
+    
+    .week-day.today .day-name {
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .week-day .day-num {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 4px 0;
+    }
+    
+    .week-day.today .day-num {
+      color: white;
+    }
+    
+    .week-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 6px;
+    }
+    
+    .week-progress-bar {
+      height: 3px;
+      background: #f5f5f4;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .week-day.today .week-progress-bar {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .week-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    
+    .week-progress-fill.amber { background: #f59e0b; }
+    .week-progress-fill.indigo { background: #6366f1; }
+    .week-day.today .week-progress-fill { background: white; }
+    
+    /* 週間テーブル */
+    .week-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    
+    .week-table th {
+      padding: 10px 4px;
+      font-weight: 500;
+      color: #a8a29e;
+      font-size: 12px;
+    }
+    
+    .week-table td {
+      padding: 8px 4px;
+      text-align: center;
+      border-top: 1px solid #f5f5f4;
+    }
+    
+    .week-table .activity-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+      padding-left: 12px;
+      color: #57534e;
+    }
+    
+    .week-check-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: none;
+      background: #f5f5f4;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      transition: all 0.2s;
+    }
+    
+    .week-check-btn:active {
+      transform: scale(0.9);
+    }
+    
+    .week-check-btn.done {
+      background: #22c55e;
+      color: white;
+    }
+    
+    .week-check-btn.scheduled {
+      background: #f5f5f4;
+    }
+    
+    .week-check-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    /* 目標ビュー */
+    .year-goals {
+      background: linear-gradient(135deg, #fef3c7, #fed7aa);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .year-goals-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #78350f;
+      margin-bottom: 16px;
+    }
+    
+    .goal-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .goal-item:active {
+      background: rgba(255,255,255,0.9);
+    }
+    
+    .goal-item.done {
+      background: #fef3c7;
+    }
+    
+    .goal-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #d97706;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    
+    .goal-check.done {
+      background: #f59e0b;
+      border-color: #f59e0b;
+    }
+    
+    .goal-check svg {
+      width: 14px;
+      height: 14px;
+      color: white;
+      opacity: 0;
+    }
+    
+    .goal-check.done svg {
+      opacity: 1;
+    }
+    
+    .goal-text {
+      flex: 1;
+      font-size: 14px;
+      color: #78350f;
+    }
+    
+    .goal-text.done {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    
+    .goal-deadline {
+      font-size: 12px;
+      color: #a8a29e;
+    }
+    
+    /* 月セレクター */
+    .month-selector {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 16px;
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .month-selector::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .month-btn {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid #e7e5e4;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .month-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .month-btn.active {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: white;
+    }
+    
+    .month-btn .name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .month-btn .pct {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    
+    /* 統計ビュー */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .stat-card {
+      border-radius: 16px;
+      padding: 16px;
+      color: white;
+      text-align: center;
+    }
+    
+    .stat-card.orange { background: linear-gradient(135deg, #f97316, #f59e0b); }
+    .stat-card.green { background: linear-gradient(135deg, #22c55e, #14b8a6); }
+    .stat-card.indigo { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .stat-card.pink { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+    
+    .stat-card svg {
+      width: 32px;
+      height: 32px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card .num {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .stat-card .label {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    /* ヒートマップ */
+    .heatmap {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: #f5f5f4;
+    }
+    
+    .heatmap-cell.l1 { background: #dcfce7; }
+    .heatmap-cell.l2 { background: #86efac; }
+    .heatmap-cell.l3 { background: #4ade80; }
+    .heatmap-cell.l4 { background: #22c55e; }
+    
+    .heatmap-legend {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #a8a29e;
+    }
+    
+    .heatmap-legend .cell {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    
+    /* 週間チャート */
+    .week-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 120px;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .week-chart-bar {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .week-chart-bar .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+    }
+    
+    .week-chart-bar .bar {
+      border-radius: 4px;
+      transition: height 0.3s;
+    }
+    
+    .week-chart-bar .bar.amber { background: #fbbf24; }
+    .week-chart-bar .bar.indigo { background: #818cf8; }
+    
+    .week-chart-bar .label {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #a8a29e;
+    }
+    
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 12px;
+      color: #78716c;
+    }
+    
+    .chart-legend span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .chart-legend .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+    }
+    
+    .chart-legend .dot.amber { background: #fbbf24; }
+    .chart-legend .dot.indigo { background: #818cf8; }
+    
+    /* ガイドライン */
+    .guidelines {
+      background: #fafaf9;
+      border-radius: 16px;
+      padding: 20px;
+    }
+    
+    .guidelines-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #44403c;
+      margin-bottom: 16px;
+    }
+    
+    .guideline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .guideline-num {
+      width: 24px;
+      height: 24px;
+      background: #e0e7ff;
+      color: #6366f1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    .guideline-text {
+      font-size: 14px;
+      color: #57534e;
+      line-height: 1.5;
+    }
+    
+    /* 半期カード */
+    .half-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .half-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid #f5f5f4;
+    }
+    
+    .half-card .label {
+      font-size: 12px;
+      color: #a8a29e;
+      margin-bottom: 4px;
+    }
+    
+    .half-card .percent {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .half-card .percent.indigo { color: #6366f1; }
+    .half-card .percent.violet { color: #8b5cf6; }
+    
+    /* 非表示 */
+    .hidden {
+      display: none !important;
+    }
+    
+    /* アニメーション */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .view {
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    /* 読書リスト */
+    .book-list {
+      padding: 16px;
+    }
+    
+    .book-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      background: rgba(251, 191, 36, 0.1);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .book-num {
+      width: 24px;
+      height: 24px;
+      background: #fef3c7;
+      color: #d97706;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .book-title {
+      font-size: 14px;
+      color: #57534e;
+    }
+  </style>
+</head>
+<body>
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1 class="font-serif">yohaku</h1>
+          <span>2026</span>
+        </div>
+      </div>
+      <div class="streak-badge" id="streakBadge">
+        <span>🔥</span>
+        <span id="streakNum">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="main">
+    <!-- 今日ビュー -->
+    <div id="todayView" class="view">
+      <!-- 日付ナビ -->
+      <div class="date-nav">
+        <button id="prevDay">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="date-display">
+          <span id="dateDisplay" class="date font-serif"></span>
+          <span id="dayDisplay" class="day"></span>
+          <div id="todayBadge" class="today-badge hidden">TODAY</div>
+        </div>
+        <button id="nextDay">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- テーマカード -->
+      <div class="theme-card">
+        <div class="theme-card-inner">
+          <div>
+            <p class="theme-label"><span id="monthName"></span>のテーマ</p>
+            <h2 class="theme-name font-serif">「<span id="monthTheme"></span>」</h2>
+            <p class="theme-quote" id="monthQuote"></p>
+          </div>
+          <div class="theme-percent">
+            <div class="num" id="monthPercent">0%</div>
+            <div class="label">目標達成</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 朝のルーティン -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon amber">☀️</div>
+            <span class="card-title">朝のルーティン</span>
+          </div>
+          <span class="card-percent amber" id="morningPercent">0%</span>
+        </div>
+        <ul class="habit-list" id="morningHabits"></ul>
+      </div>
+
+      <!-- 夜のルーティン -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon indigo">🌙</div>
+            <span class="card-title">夜のルーティン</span>
+          </div>
+          <span class="card-percent indigo" id="eveningPercent">0%</span>
+        </div>
+        <ul class="habit-list" id="eveningHabits"></ul>
+      </div>
+
+      <!-- 健康記録 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon rose">❤️</div>
+            <span class="card-title">健康記録</span>
+          </div>
+        </div>
+        <div class="health-grid" id="healthInputs"></div>
+      </div>
+
+      <!-- メモ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon teal">✏️</div>
+            <span class="card-title">今日の一言</span>
+          </div>
+        </div>
+        <div style="padding: 16px; padding-top: 0;">
+          <textarea id="noteInput" class="note-textarea" placeholder="気づき、感謝、振り返り..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 週間ビュー -->
+    <div id="weekView" class="view hidden">
+      <!-- 週ナビ -->
+      <div class="date-nav">
+        <button id="prevWeek">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="date-display">
+          <span id="weekDisplay" class="date font-serif"></span>
+        </div>
+        <button id="nextWeek">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- 週間カレンダー -->
+      <div class="week-grid" id="weekGrid"></div>
+
+      <!-- 週間アクティビティ -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">週間アクティビティ</span>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="week-table" id="weekTable"></table>
+        </div>
+      </div>
+
+      <!-- 読書リスト -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon amber">📚</div>
+            <span class="card-title" id="bookListTitle">読書リスト</span>
+          </div>
+        </div>
+        <div class="book-list" id="bookList"></div>
+      </div>
+    </div>
+
+    <!-- 目標ビュー -->
+    <div id="goalsView" class="view hidden">
+      <!-- 年間目標 -->
+      <div class="year-goals">
+        <div class="year-goals-title">
+          <span>⭐</span>
+          <span class="font-serif">2026年 年間目標</span>
+        </div>
+        <div id="yearGoalsList"></div>
+      </div>
+
+      <!-- 月セレクター -->
+      <div class="month-selector" id="monthSelector"></div>
+
+      <!-- 月間目標 -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title" id="monthGoalTitle"></span>
+            <p style="font-size: 12px; color: #a8a29e; margin-top: 4px;" id="monthGoalQuote"></p>
+          </div>
+          <span class="card-percent indigo" id="monthGoalPercent">0%</span>
+        </div>
+        <ul class="habit-list" id="monthGoalsList"></ul>
+      </div>
+
+      <!-- 半期進捗 -->
+      <div class="half-grid">
+        <div class="half-card">
+          <div class="label">上半期 (1-6月)</div>
+          <div class="percent indigo" id="h1Percent">0%</div>
+        </div>
+        <div class="half-card">
+          <div class="label">下半期 (7-12月)</div>
+          <div class="percent violet" id="h2Percent">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 統計ビュー -->
+    <div id="statsView" class="view hidden">
+      <!-- 統計カード -->
+      <div class="stats-grid">
+        <div class="stat-card orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          <div class="num" id="statStreak">0</div>
+          <div class="label">連続日数</div>
+        </div>
+        <div class="stat-card green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          <div class="num" id="statHabits">0</div>
+          <div class="label">完了習慣</div>
+        </div>
+        <div class="stat-card indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <div class="num" id="statGoals">0</div>
+          <div class="label">達成目標</div>
+        </div>
+        <div class="stat-card pink">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+          <div class="num">57</div>
+          <div class="label">年間読書</div>
+        </div>
+      </div>
+
+      <!-- ヒートマップ -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">過去30日の習慣達成</span>
+        </div>
+        <div style="padding: 16px;">
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heatmap-legend">
+            <span>少</span>
+            <div class="cell" style="background: #f5f5f4;"></div>
+            <div class="cell" style="background: #dcfce7;"></div>
+            <div class="cell" style="background: #86efac;"></div>
+            <div class="cell" style="background: #4ade80;"></div>
+            <div class="cell" style="background: #22c55e;"></div>
+            <span>多</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 週間チャート -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">今週のパフォーマンス</span>
+        </div>
+        <div style="padding: 16px;">
+          <div class="week-chart" id="weekChart"></div>
+          <div class="chart-legend">
+            <span><div class="dot amber"></div>朝</span>
+            <span><div class="dot indigo"></div>夜</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 年間指針 -->
+      <div class="guidelines">
+        <div class="guidelines-title font-serif">年間指針</div>
+        <div class="guideline-item">
+          <div class="guideline-num">1</div>
+          <div class="guideline-text">批評家にならず、手を動かし続ける</div>
+        </div>
+        <div class="guideline-item">
+          <div class="guideline-num">2</div>
+          <div class="guideline-text">脆弱性を認め合う関係性を作る</div>
+        </div>
+        <div class="guideline-item">
+          <div class="guideline-num">3</div>
+          <div class="guideline-text">不可逆性と一回性を大切にする</div>
+        </div>
+        <div class="guideline-item">
+          <div class="guideline-num">4</div>
+          <div class="guideline-text">変化を受け入れながら、大切なものを守る</div>
+        </div>
+        <div class="guideline-item">
+          <div class="guideline-num">5</div>
+          <div class="guideline-text">エッセンシャルワーカーが誰よりも幸せであってほしい</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ボトムナビ -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="nav-btn active" data-view="today">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <span>今日</span>
+      </button>
+      <button class="nav-btn" data-view="week">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        <span>週間</span>
+      </button>
+      <button class="nav-btn" data-view="goals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>目標</span>
+      </button>
+      <button class="nav-btn" data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>
+        <span>統計</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    // ===== データ定義 =====
+    const MONTHS = [
+      { id: 1, name: '1月', theme: '始動', quote: '批評家にならず、手を動かし続ける',
+        goals: ['年間計画確定・共有', 'ドラムスタジオ契約', 'ドラム練習8回', '朝ルーティン定着率80%', '24hファスティング4回', '投資家リスト30名', 'note記事2本公開', '美術展3回', '読書5冊読了'],
+        books: ['プロフェッショナル原論', 'ケアの倫理', '存在と時間（入門）', '人間失格', '現代アートとは何か']
+      },
+      { id: 2, name: '2月', theme: '深掘り', quote: '脆弱性を認め合う関係性を作る',
+        goals: ['MBA学習16時間', 'コーチング研修申込完了', '脆弱性論文3本読了', 'ピッチ練習10回', '読書5冊読了', '美術展3回', '乃木坂物件候補3件以上'],
+        books: ['もうひとつの声で', 'MBAファイナンス', '論語', 'こころ', '美術の物語']
+      },
+      { id: 3, name: '3月', theme: '対話', quote: '不可逆性と一回性を大切にする',
+        goals: ['乃木坂物件内見3件以上', '投資家面談3件完了', 'NVCワークショップ参加', 'ケア労働者インタビュー1件', '読書5冊読了', '美術展3回', '物件契約準備完了'],
+        books: ['ケアの倫理と共感', 'NVC', '善悪の彼岸', 'グレート・ギャツビー', '写真の歴史']
+      },
+      { id: 4, name: '4月', theme: '移転', quote: '変化を受け入れながら、大切なものを守る',
+        goals: ['乃木坂引越し完了', '写真展企画書作成', 'フィルム5本撮影', '明るい部屋・写真論精読', '読書5冊読了', '美術展3回', '新ルーティン確立'],
+        books: ['明るい部屋', '写真論', '純粋理性批判（入門）', '異邦人', 'アート・スピリット']
+      },
+      { id: 5, name: '5月', theme: '事業', quote: 'エッセンシャルワーカーが誰よりも幸せであってほしい',
+        goals: ['yohaku月商50万円', 'PxDT上期成果資料完成', '投資家面談5件以上', '読書5冊読了', '美術展3回', '写真展会場候補リスト完成'],
+        books: ['2030年の世界地図帳', 'デジタルネイチャー', '方法序説', '1984年', '芸術の意味']
+      },
+      { id: 6, name: '6月', theme: '評価', quote: '豊かな後悔の多い人生を',
+        goals: ['PxDT上期評価面談完了', '上半期総括note公開', 'コーチング研修開始', '読書4冊読了', '美術展3回', '体重60kg達成', '下半期計画策定完了'],
+        books: ['ピーター・パン', 'いのちはのちのいのちへ', 'エチカ（入門）', '星の王子さま']
+      },
+      { id: 7, name: '7月', theme: '継承', quote: '戦争の記憶と向き合う',
+        goals: ['コーチング資格研修集中', '戦争と記憶のnote記事', '広島訪問計画確定', '読書5冊読了', '美術展3回'],
+        books: ['他者の苦痛へのまなざし', '夜と霧', '全体性と無限（入門）', '戦争と平和（抜粋）', 'ゲルニカ関連']
+      },
+      { id: 8, name: '8月', theme: '祈り', quote: '8月6日、傍にいることの意味',
+        goals: ['8/6 広島訪問', 'コーチング資格試験準備', '写真選定（展覧会用）', '読書4冊読了', '静かに内省する時間確保'],
+        books: ['原爆詩集', 'ヒロシマ・ノート', '死に至る病', '黒い雨']
+      },
+      { id: 9, name: '9月', theme: '資格', quote: 'コーチング資格試験',
+        goals: ['コーチング資格試験合格', '写真展準備本格化', 'プロトタイプ開発着手', '読書5冊読了', '美術展3回'],
+        books: ['愛するということ', '暇と退屈の倫理学', 'コーチングの基本', '罪と罰', 'アートの力']
+      },
+      { id: 10, name: '10月', theme: '接続', quote: 'テクノロジーとケアの間',
+        goals: ['yohaku月商80万円', 'テクノロジー×ケア論考完成', '写真展告知・DM発送', '読書5冊読了', '美術展3回'],
+        books: ['生命とは何か', '生物から見た世界', '現象学の理念', '変身', '芸術と脳']
+      },
+      { id: 11, name: '11月', theme: '発表', quote: 'フィルム写真展開催',
+        goals: ['フィルム写真展開催・成功', 'PxDT下期成果まとめ', 'スイス渡航準備', '読書5冊読了', '美術展2回'],
+        books: ['贈与論', 'コンヴィヴィアリティのための道具', '精神現象学（入門）', 'ノルウェイの森', 'スイス関連']
+      },
+      { id: 12, name: '12月', theme: '達成', quote: '2026年を振り返り、2030年を見据える',
+        goals: ['yohaku月商100万円達成', 'PxDT下期評価・昇格', 'スイス渡航', '2026年総括note公開', '2027年計画策定', '読書4冊読了'],
+        books: ['ツァラトゥストラ', '雪国', '2027年計画策定']
+      }
+    ];
+
+    const YEAR_GOALS = [
+      { text: 'yohaku月商100万円達成', deadline: '12月' },
+      { text: 'PxDT昇格・昇給', deadline: '評価期' },
+      { text: 'コーチング資格取得', deadline: '9月' },
+      { text: 'フィルム写真展開催', deadline: '11月' },
+      { text: 'MBA科目修了', deadline: '通年' },
+      { text: '乃木坂へ引越し', deadline: '4月' },
+      { text: '体重60kg維持', deadline: '通年' },
+      { text: 'スイス渡航', deadline: '12月' }
+    ];
+
+    const MORNING_HABITS = [
+      { id: 'wake', name: '起床・白湯', time: '6:00' },
+      { id: 'meditation_am', name: '瞑想', time: '6:10' },
+      { id: 'walk', name: '朝散歩', time: '6:25' },
+      { id: 'exercise', name: '筋トレ', time: '6:55' },
+      { id: 'breakfast', name: '腸活朝食', time: '7:10' }
+    ];
+
+    const EVENING_HABITS = [
+      { id: 'reading', name: '読書', time: '21:00' },
+      { id: 'study', name: 'MBA/ドラム', time: '21:30' },
+      { id: 'journal', name: '振り返り', time: '22:00' },
+      { id: 'meditation_pm', name: '瞑想', time: '22:50' }
+    ];
+
+    const WEEKLY_ACTIVITIES = [
+      { id: 'mba', name: 'MBA学習', icon: '🎓', days: [1, 3, 7] },
+      { id: 'drum', name: 'ドラム', icon: '🥁', days: [2, 4] },
+      { id: 'nvc', name: 'NVC', icon: '👥', days: [2] },
+      { id: 'film', name: '撮影', icon: '📷', days: [5] },
+      { id: 'museum', name: '美術展', icon: '🎨', days: [6, 7] },
+      { id: 'tea', name: '茶道', icon: '🍵', days: [6] },
+      { id: 'fasting', name: 'ファスティング', icon: '⚡', days: [6] }
+    ];
+
+    const HEALTH_ITEMS = [
+      { id: 'weight', name: '体重', unit: 'kg', icon: '⚖️' },
+      { id: 'sleep', name: '睡眠', unit: 'h', icon: '🌙' },
+      { id: 'steps', name: '歩数', unit: '歩', icon: '👟' },
+      { id: 'water', name: '水分', unit: 'L', icon: '💧' }
+    ];
+
+    // ===== ストレージ =====
+    const store = {
+      get(key) {
+        try {
+          const data = localStorage.getItem('yohaku-' + key);
+          return data ? JSON.parse(data) : {};
+        } catch (e) {
+          return {};
+        }
+      },
+      set(key, value) {
+        try {
+          localStorage.setItem('yohaku-' + key, JSON.stringify(value));
+        } catch (e) {}
+      }
+    };
+
+    // ===== 状態 =====
+    let currentView = 'today';
+    let selectedDate = new Date();
+    let habits = store.get('habits');
+    let goals = store.get('goals');
+    let health = store.get('health');
+    let notes = store.get('notes');
+
+    // ===== ユーティリティ =====
+    function formatDate(date) {
+      const d = new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getWeekDates(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d);
+      monday.setDate(diff);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const dd = new Date(monday);
+        dd.setDate(monday.getDate() + i);
+        dates.push(formatDate(dd));
+      }
+      return dates;
+    }
+
+    function getDayName(date) {
+      return ['日', '月', '火', '水', '木', '金', '土'][new Date(date).getDay()];
+    }
+
+    function isToday(dateStr) {
+      return formatDate(new Date()) === dateStr;
+    }
+
+    function getCurrentMonth() {
+      const m = new Date(selectedDate).getMonth() + 1;
+      return MONTHS.find(month => month.id === m) || MONTHS[0];
+    }
+
+    function getCompletion(dateStr, period) {
+      const items = period === 'morning' ? MORNING_HABITS : EVENING_HABITS;
+      const done = items.filter(h => habits[`${dateStr}-${period}-${h.id}`]).length;
+      return { done, total: items.length, pct: Math.round((done / items.length) * 100) };
+    }
+
+    function getMonthProgress(monthId) {
+      const month = MONTHS.find(m => m.id === monthId);
+      if (!month) return { done: 0, total: 0, pct: 0 };
+      const done = month.goals.filter((_, i) => goals[`m${monthId}-g${i}`]).length;
+      return { done, total: month.goals.length, pct: Math.round((done / month.goals.length) * 100) };
+    }
+
+    function getStreak() {
+      let streak = 0;
+      const today = new Date();
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = formatDate(d);
+        const m = getCompletion(dateStr, 'morning');
+        const e = getCompletion(dateStr, 'evening');
+        if (m.pct >= 60 && e.pct >= 60) {
+          streak++;
+        } else if (i > 0) {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    // ===== レンダリング =====
+    function renderTodayView() {
+      const dateStr = formatDate(selectedDate);
+      const month = getCurrentMonth();
+      
+      // 日付表示
+      document.getElementById('dateDisplay').textContent = 
+        `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日`;
+      document.getElementById('dayDisplay').textContent = `(${getDayName(selectedDate)})`;
+      document.getElementById('todayBadge').classList.toggle('hidden', !isToday(dateStr));
+      
+      // 月テーマ
+      document.getElementById('monthName').textContent = month.name;
+      document.getElementById('monthTheme').textContent = month.theme;
+      document.getElementById('monthQuote').textContent = month.quote;
+      document.getElementById('monthPercent').textContent = getMonthProgress(month.id).pct + '%';
+      
+      // 朝のルーティン
+      const morningHtml = MORNING_HABITS.map(h => {
+        const done = habits[`${dateStr}-morning-${h.id}`];
+        return `
+          <li class="habit-item" data-period="morning" data-id="${h.id}">
+            <div class="habit-check ${done ? 'done amber' : ''}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div class="habit-info">
+              <div class="habit-name ${done ? 'done' : ''}">${h.name}</div>
+            </div>
+            <span class="habit-time">${h.time}</span>
+          </li>
+        `;
+      }).join('');
+      document.getElementById('morningHabits').innerHTML = morningHtml;
+      document.getElementById('morningPercent').textContent = getCompletion(dateStr, 'morning').pct + '%';
+      
+      // 夜のルーティン
+      const eveningHtml = EVENING_HABITS.map(h => {
+        const done = habits[`${dateStr}-evening-${h.id}`];
+        return `
+          <li class="habit-item" data-period="evening" data-id="${h.id}">
+            <div class="habit-check ${done ? 'done indigo' : ''}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div class="habit-info">
+              <div class="habit-name ${done ? 'done' : ''}">${h.name}</div>
+            </div>
+            <span class="habit-time">${h.time}</span>
+          </li>
+        `;
+      }).join('');
+      document.getElementById('eveningHabits').innerHTML = eveningHtml;
+      document.getElementById('eveningPercent').textContent = getCompletion(dateStr, 'evening').pct + '%';
+      
+      // 健康記録
+      const healthHtml = HEALTH_ITEMS.map(h => `
+        <div class="health-item">
+          <div class="health-label">
+            <span>${h.icon}</span>
+            <span>${h.name}</span>
+          </div>
+          <div class="health-input-wrap">
+            <input type="number" inputmode="decimal" class="health-input" 
+              data-field="${h.id}" value="${health[`${dateStr}-${h.id}`] || ''}" placeholder="--">
+            <span class="health-unit">${h.unit}</span>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('healthInputs').innerHTML = healthHtml;
+      
+      // メモ
+      document.getElementById('noteInput').value = notes[dateStr] || '';
+      
+      // ストリーク
+      const streak = getStreak();
+      document.getElementById('streakNum').textContent = streak;
+      document.getElementById('streakBadge').style.display = streak > 0 ? 'flex' : 'none';
+    }
+
+    function renderWeekView() {
+      const weekDates = getWeekDates(selectedDate);
+      const todayStr = formatDate(new Date());
+      const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
+      const month = getCurrentMonth();
+      
+      // 週表示
+      const startDate = new Date(weekDates[0]);
+      const endDate = new Date(weekDates[6]);
+      document.getElementById('weekDisplay').textContent = 
+        `${startDate.getMonth() + 1}/${startDate.getDate()} 〜 ${endDate.getMonth() + 1}/${endDate.getDate()}`;
+      
+      // 週間カレンダー
+      const weekGridHtml = weekDates.map((date, i) => {
+        const d = new Date(date);
+        const m = getCompletion(date, 'morning');
+        const e = getCompletion(date, 'evening');
+        const isT = date === todayStr;
+        return `
+          <div class="week-day ${isT ? 'today' : ''}" data-date="${date}">
+            <div class="day-name">${dayNames[i]}</div>
+            <div class="day-num">${d.getDate()}</div>
+            <div class="week-progress">
+              <div class="week-progress-bar">
+                <div class="week-progress-fill amber" style="width: ${m.pct}%"></div>
+              </div>
+              <div class="week-progress-bar">
+                <div class="week-progress-fill indigo" style="width: ${e.pct}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('weekGrid').innerHTML = weekGridHtml;
+      
+      // 週間テーブル
+      let tableHtml = '<thead><tr><th style="text-align:left;padding-left:12px;">活動</th>';
+      dayNames.forEach(d => { tableHtml += `<th>${d}</th>`; });
+      tableHtml += '</tr></thead><tbody>';
+      
+      WEEKLY_ACTIVITIES.forEach(act => {
+        tableHtml += `<tr><td class="activity-name"><span>${act.icon}</span>${act.name}</td>`;
+        weekDates.forEach((date, dayIdx) => {
+          const key = `${date}-weekly-${act.id}`;
+          const done = habits[key];
+          const scheduled = act.days.includes(dayIdx + 1);
+          tableHtml += `<td>
+            <button class="week-check-btn ${done ? 'done' : scheduled ? 'scheduled' : ''}" 
+              data-key="${key}" ${!scheduled && !done ? 'style="opacity:0.3"' : ''}>
+              ${done ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>' : 
+                scheduled ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#d6d3d1"><circle cx="12" cy="12" r="3"/></svg>' : ''}
+            </button>
+          </td>`;
+        });
+        tableHtml += '</tr>';
+      });
+      tableHtml += '</tbody>';
+      document.getElementById('weekTable').innerHTML = tableHtml;
+      
+      // 読書リスト
+      document.getElementById('bookListTitle').textContent = month.name + 'の読書リスト';
+      const bookHtml = month.books.map((book, i) => `
+        <div class="book-item">
+          <div class="book-num">${i + 1}</div>
+          <div class="book-title">${book}</div>
+        </div>
+      `).join('');
+      document.getElementById('bookList').innerHTML = bookHtml;
+    }
+
+    function renderGoalsView() {
+      const month = getCurrentMonth();
+      
+      // 年間目標
+      const yearGoalsHtml = YEAR_GOALS.map((g, i) => {
+        const done = goals[`year-${i}`];
+        return `
+          <div class="goal-item ${done ? 'done' : ''}" data-key="year-${i}">
+            <div class="goal-check ${done ? 'done' : ''}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <span class="goal-text ${done ? 'done' : ''}">${g.text}</span>
+            <span class="goal-deadline">${g.deadline}</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('yearGoalsList').innerHTML = yearGoalsHtml;
+      
+      // 月セレクター
+      const monthSelectorHtml = MONTHS.map(m => {
+        const p = getMonthProgress(m.id);
+        const active = m.id === month.id;
+        return `
+          <button class="month-btn ${active ? 'active' : ''}" data-month="${m.id}">
+            <div class="name">${m.name}</div>
+            <div class="pct">${p.pct}%</div>
+          </button>
+        `;
+      }).join('');
+      document.getElementById('monthSelector').innerHTML = monthSelectorHtml;
+      
+      // 月間目標
+      document.getElementById('monthGoalTitle').textContent = `${month.name}「${month.theme}」`;
+      document.getElementById('monthGoalQuote').textContent = month.quote;
+      document.getElementById('monthGoalPercent').textContent = getMonthProgress(month.id).pct + '%';
+      
+      const monthGoalsHtml = month.goals.map((g, i) => {
+        const done = goals[`m${month.id}-g${i}`];
+        return `
+          <li class="habit-item" data-key="m${month.id}-g${i}">
+            <div class="habit-check ${done ? 'done green' : ''}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div class="habit-info">
+              <div class="habit-name ${done ? 'done' : ''}">${g}</div>
+            </div>
+          </li>
+        `;
+      }).join('');
+      document.getElementById('monthGoalsList').innerHTML = monthGoalsHtml;
+      
+      // 半期進捗
+      const h1Pct = Math.round(MONTHS.slice(0, 6).reduce((a, m) => a + getMonthProgress(m.id).pct, 0) / 6);
+      const h2Pct = Math.round(MONTHS.slice(6, 12).reduce((a, m) => a + getMonthProgress(m.id).pct, 0) / 6);
+      document.getElementById('h1Percent').textContent = h1Pct + '%';
+      document.getElementById('h2Percent').textContent = h2Pct + '%';
+    }
+
+    function renderStatsView() {
+      const streak = getStreak();
+      const habitCount = Object.values(habits).filter(Boolean).length;
+      const goalCount = Object.values(goals).filter(Boolean).length;
+      
+      document.getElementById('statStreak').textContent = streak;
+      document.getElementById('statHabits').textContent = habitCount;
+      document.getElementById('statGoals').textContent = goalCount;
+      
+      // ヒートマップ
+      let heatmapHtml = '';
+      for (let i = 0; i < 30; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - (29 - i));
+        const dateStr = formatDate(d);
+        const m = getCompletion(dateStr, 'morning');
+        const e = getCompletion(dateStr, 'evening');
+        const avg = (m.pct + e.pct) / 2;
+        let level = '';
+        if (avg >= 80) level = 'l4';
+        else if (avg >= 60) level = 'l3';
+        else if (avg >= 40) level = 'l2';
+        else if (avg > 0) level = 'l1';
+        heatmapHtml += `<div class="heatmap-cell ${level}"></div>`;
+      }
+      document.getElementById('heatmap').innerHTML = heatmapHtml;
+      
+      // 週間チャート
+      const weekDates = getWeekDates(selectedDate);
+      const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
+      let chartHtml = '';
+      weekDates.forEach((date, i) => {
+        const m = getCompletion(date, 'morning');
+        const e = getCompletion(date, 'evening');
+        chartHtml += `
+          <div class="week-chart-bar">
+            <div class="bars">
+              <div class="bar amber" style="height: ${m.pct * 0.9}px"></div>
+              <div class="bar indigo" style="height: ${e.pct * 0.9}px"></div>
+            </div>
+            <div class="label">${dayNames[i]}</div>
+          </div>
+        `;
+      });
+      document.getElementById('weekChart').innerHTML = chartHtml;
+    }
+
+    function render() {
+      document.getElementById('todayView').classList.toggle('hidden', currentView !== 'today');
+      document.getElementById('weekView').classList.toggle('hidden', currentView !== 'week');
+      document.getElementById('goalsView').classList.toggle('hidden', currentView !== 'goals');
+      document.getElementById('statsView').classList.toggle('hidden', currentView !== 'stats');
+      
+      if (currentView === 'today') renderTodayView();
+      else if (currentView === 'week') renderWeekView();
+      else if (currentView === 'goals') renderGoalsView();
+      else if (currentView === 'stats') renderStatsView();
+    }
+
+    // ===== イベントリスナー =====
+    // ナビゲーション
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        render();
+      });
+    });
+
+    // 日付ナビ
+    document.getElementById('prevDay').addEventListener('click', () => {
+      selectedDate.setDate(selectedDate.getDate() - 1);
+      render();
+    });
+    document.getElementById('nextDay').addEventListener('click', () => {
+      selectedDate.setDate(selectedDate.getDate() + 1);
+      render();
+    });
+
+    // 週ナビ
+    document.getElementById('prevWeek').addEventListener('click', () => {
+      selectedDate.setDate(selectedDate.getDate() - 7);
+      render();
+    });
+    document.getElementById('nextWeek').addEventListener('click', () => {
+      selectedDate.setDate(selectedDate.getDate() + 7);
+      render();
+    });
+
+    // 習慣トグル
+    document.addEventListener('click', (e) => {
+      const habitItem = e.target.closest('.habit-item[data-period]');
+      if (habitItem) {
+        const dateStr = formatDate(selectedDate);
+        const key = `${dateStr}-${habitItem.dataset.period}-${habitItem.dataset.id}`;
+        habits[key] = !habits[key];
+        store.set('habits', habits);
+        render();
+      }
+      
+      // 週間チェック
+      const weekCheckBtn = e.target.closest('.week-check-btn');
+      if (weekCheckBtn) {
+        const key = weekCheckBtn.dataset.key;
+        habits[key] = !habits[key];
+        store.set('habits', habits);
+        render();
+      }
+      
+      // 目標トグル（年間）
+      const goalItem = e.target.closest('.goal-item[data-key]');
+      if (goalItem) {
+        const key = goalItem.dataset.key;
+        goals[key] = !goals[key];
+        store.set('goals', goals);
+        render();
+      }
+      
+      // 月間目標トグル
+      const monthGoalItem = e.target.closest('#monthGoalsList .habit-item[data-key]');
+      if (monthGoalItem) {
+        const key = monthGoalItem.dataset.key;
+        goals[key] = !goals[key];
+        store.set('goals', goals);
+        render();
+      }
+      
+      // 週間日付クリック
+      const weekDay = e.target.closest('.week-day[data-date]');
+      if (weekDay) {
+        selectedDate = new Date(weekDay.dataset.date);
+        currentView = 'today';
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.nav-btn[data-view="today"]').classList.add('active');
+        render();
+      }
+      
+      // 月セレクター
+      const monthBtn = e.target.closest('.month-btn[data-month]');
+      if (monthBtn) {
+        const monthId = parseInt(monthBtn.dataset.month);
+        selectedDate = new Date(2026, monthId - 1, 15);
+        render();
+      }
+    });
+
+    // 健康記録
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('health-input')) {
+        const dateStr = formatDate(selectedDate);
+        const key = `${dateStr}-${e.target.dataset.field}`;
+        health[key] = e.target.value;
+        store.set('health', health);
+      }
+    });
+
+    // メモ
+    document.getElementById('noteInput').addEventListener('input', (e) => {
+      const dateStr = formatDate(selectedDate);
+      notes[dateStr] = e.target.value;
+      store.set('notes', notes);
+    });
+
+    // 初期レンダリング
+    render();
+  </script>
+</body>
+</html>
