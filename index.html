@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-title" content="余白">
     <meta name="theme-color" content="#0d0d14">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
     <title>余白 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,6 +15,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Light Mode (Default - Day) */
+            --bg-primary: #faf9f7;
+            --bg-secondary: #f5f4f2;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8f7f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --text-muted: #8a8a8a;
+            --accent-gold: #c4956a;
+            --accent-gold-dim: rgba(196, 149, 106, 0.12);
+            --accent-sage: #6b8f71;
+            --accent-sage-dim: rgba(107, 143, 113, 0.12);
+            --accent-blue: #5a7d9a;
+            --accent-blue-dim: rgba(90, 125, 154, 0.12);
+            --accent-rose: #b07878;
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --border-medium: rgba(0, 0, 0, 0.1);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --font-sans: 'Zen Kaku Gothic New', sans-serif;
+            --font-serif: 'Noto Serif JP', serif;
+            --font-display: 'Cormorant Garamond', serif;
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        
+        [data-theme="dark"] {
             --bg-primary: #0d0d14;
             --bg-secondary: #151520;
             --bg-card: #1a1a28;
@@ -27,41 +57,64 @@
             --accent-gold-dim: rgba(212, 165, 116, 0.15);
             --accent-sage: #8fa68a;
             --accent-sage-dim: rgba(143, 166, 138, 0.15);
-            --accent-rose: #c49191;
             --accent-blue: #7d9db7;
+            --accent-blue-dim: rgba(125, 157, 183, 0.15);
+            --accent-rose: #c49191;
             --border-subtle: rgba(248, 240, 227, 0.08);
             --border-medium: rgba(248, 240, 227, 0.12);
-            --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.4);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --radius-xl: 28px;
-            --font-sans: 'Zen Kaku Gothic New', sans-serif;
-            --font-serif: 'Noto Serif JP', serif;
-            --font-display: 'Cormorant Garamond', serif;
-            --safe-top: env(safe-area-inset-top, 20px);
-            --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
         }
-
+        
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; overflow: hidden; }
-        body { font-family: var(--font-sans); background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; font-weight: 300; }
-
-        .app { height: 100%; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%); }
-
+        body { 
+            font-family: var(--font-sans); 
+            background: var(--bg-primary); 
+            color: var(--text-primary); 
+            line-height: 1.7; 
+            font-weight: 300;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+        .app { 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            max-width: 480px; 
+            margin: 0 auto; 
+            background: var(--bg-primary);
+            transition: background 0.5s ease;
+        }
+        
         /* Header */
-        .header { padding: calc(var(--safe-top) + 12px) 20px 16px; background: linear-gradient(180deg, rgba(13, 13, 20, 0.98) 0%, rgba(13, 13, 20, 0.9) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-subtle); position: relative; z-index: 100; }
+        .header { 
+            padding: calc(var(--safe-top) + 12px) 20px 16px; 
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-subtle); 
+            position: relative; 
+            z-index: 100;
+            transition: background 0.5s ease;
+        }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .logo { font-family: var(--font-serif); font-size: 26px; font-weight: 400; color: var(--text-primary); letter-spacing: 0.15em; }
         .logo span { color: var(--accent-gold); font-size: 10px; vertical-align: super; margin-left: 4px; }
         .header-actions { display: flex; gap: 8px; }
-        .header-btn { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 8px; border-radius: 50%; cursor: pointer; transition: all 0.2s; }
+        .header-btn { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            color: var(--text-secondary); 
+            padding: 8px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
         .header-btn:hover { background: var(--bg-card-hover); color: var(--accent-gold); }
-        .header-btn svg { width: 20px; height: 20px; }
+        .header-btn svg { width: 20px; height: 20px; display: block; }
         .date-nav { display: flex; align-items: center; justify-content: center; gap: 16px; }
         .date-nav button { background: none; border: none; color: var(--text-secondary); padding: 8px; cursor: pointer; border-radius: 50%; transition: all 0.2s; }
         .date-nav button:hover { background: var(--border-subtle); color: var(--text-primary); }
-        .date-nav button svg { width: 20px; height: 20px; }
+        .date-nav button svg { width: 20px; height: 20px; display: block; }
         .current-date { font-family: var(--font-serif); font-size: 15px; color: var(--text-primary); cursor: pointer; padding: 6px 16px; border-radius: var(--radius-sm); transition: background 0.2s; }
         .current-date:hover { background: var(--border-subtle); }
         .current-date .weekday { color: var(--accent-gold); margin-left: 8px; font-size: 13px; }
@@ -73,25 +126,37 @@
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Time Display with Period Indicator */
+        /* Time Display */
         .time-section { text-align: center; margin-bottom: 24px; }
         .current-time { font-family: var(--font-display); font-size: 56px; color: var(--text-primary); letter-spacing: 0.05em; }
-        .time-period { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-        .time-period.active-morning { color: var(--accent-gold); }
-        .time-period.active-evening { color: var(--accent-blue); }
-        .routine-indicator { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
-        .routine-badge { padding: 6px 16px; border-radius: 20px; font-size: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-muted); transition: all 0.3s; }
-        .routine-badge.active { border-color: var(--accent-gold); color: var(--accent-gold); background: var(--accent-gold-dim); }
-        .routine-badge.evening.active { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(125, 157, 183, 0.15); }
+        .time-period { font-size: 14px; color: var(--text-muted); margin-top: 8px; padding: 6px 16px; display: inline-block; border-radius: 20px; }
+        .time-period.morning { background: var(--accent-gold-dim); color: var(--accent-gold); }
+        .time-period.evening { background: var(--accent-blue-dim); color: var(--accent-blue); }
 
         /* Quote Card */
-        .quote-card { background: linear-gradient(135deg, var(--bg-card) 0%, rgba(26, 26, 40, 0.8) 100%); border: 1px solid var(--border-medium); border-radius: var(--radius-xl); padding: 28px 24px; margin-bottom: 24px; position: relative; overflow: hidden; }
+        .quote-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: var(--radius-xl); 
+            padding: 28px 24px; 
+            margin-bottom: 24px; 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
         .quote-card::before { content: '"'; position: absolute; top: -10px; left: 16px; font-family: var(--font-display); font-size: 120px; color: var(--accent-gold); opacity: 0.08; line-height: 1; }
         .quote-text { font-family: var(--font-serif); font-size: 15px; line-height: 2; color: var(--text-primary); margin-bottom: 16px; position: relative; z-index: 1; }
         .quote-source { font-size: 12px; color: var(--text-muted); text-align: right; }
 
         /* Month Card */
-        .month-card { background: linear-gradient(145deg, var(--accent-gold-dim) 0%, transparent 60%); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: var(--radius-xl); padding: 24px; margin-bottom: 24px; }
+        .month-card { 
+            background: linear-gradient(145deg, var(--accent-gold-dim) 0%, var(--bg-card) 60%); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: var(--radius-xl); 
+            padding: 24px; 
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+        }
         .month-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .month-label { font-size: 11px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 4px; }
         .month-theme { font-family: var(--font-serif); font-size: 28px; font-weight: 500; color: var(--text-primary); }
@@ -105,52 +170,47 @@
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .section-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 500; }
         .section-progress { font-size: 13px; color: var(--accent-sage); font-weight: 500; }
-        .section.highlighted { background: var(--accent-gold-dim); margin: -12px -20px 28px; padding: 12px 20px 20px; border-radius: var(--radius-lg); }
-        .section.highlighted-evening { background: rgba(125, 157, 183, 0.1); }
-        .section-time-badge { font-size: 11px; color: var(--accent-gold); background: var(--accent-gold-dim); padding: 4px 10px; border-radius: 12px; }
-        .section.highlighted-evening .section-time-badge { color: var(--accent-blue); background: rgba(125, 157, 183, 0.15); }
+        .section-badge { font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; }
+        .section-badge.morning { background: var(--accent-gold-dim); color: var(--accent-gold); }
+        .section-badge.evening { background: var(--accent-blue-dim); color: var(--accent-blue); }
+        .section.highlighted { background: var(--accent-gold-dim); margin: -12px -20px 28px; padding: 20px; border-radius: var(--radius-lg); }
+        .section.highlighted.evening { background: var(--accent-blue-dim); }
 
         /* Habit Item */
         .habit-list { display: flex; flex-direction: column; gap: 10px; }
-        .habit-item { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px 18px; cursor: pointer; transition: all 0.25s ease; }
+        .habit-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: var(--radius-md); 
+            padding: 16px 18px; 
+            cursor: pointer; 
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-sm);
+        }
         .habit-item:hover { background: var(--bg-card-hover); border-color: var(--border-medium); }
-        .habit-item.completed { background: var(--accent-sage-dim); border-color: rgba(143, 166, 138, 0.3); }
+        .habit-item.completed { background: var(--accent-sage-dim); border-color: rgba(107, 143, 113, 0.3); }
         .habit-checkbox { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.25s; flex-shrink: 0; }
         .habit-item.completed .habit-checkbox { background: var(--accent-sage); border-color: var(--accent-sage); }
-        .habit-checkbox svg { width: 14px; height: 14px; color: transparent; transition: color 0.2s; }
+        .habit-checkbox svg { width: 14px; height: 14px; color: transparent; }
         .habit-item.completed .habit-checkbox svg { color: var(--bg-primary); }
         .habit-info { flex: 1; }
         .habit-name { font-size: 15px; color: var(--text-primary); margin-bottom: 2px; }
-        .habit-time { font-size: 12px; color: var(--text-muted); }
+        .habit-time { font-size: 12px; color: var(--accent-gold); font-weight: 500; }
         .habit-item.completed .habit-name { text-decoration: line-through; opacity: 0.7; }
-        .habit-timer-btn { background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-        .habit-timer-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
-        .habit-timer-btn.running { background: var(--accent-gold-dim); border-color: var(--accent-gold); color: var(--accent-gold); }
-        .habit-timer-btn svg { width: 14px; height: 14px; }
-
-        /* Timer Modal */
-        .timer-display { text-align: center; padding: 40px 20px; }
-        .timer-value { font-family: var(--font-display); font-size: 72px; color: var(--text-primary); letter-spacing: 0.05em; }
-        .timer-label { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
-        .timer-progress { height: 6px; background: var(--border-subtle); border-radius: 3px; margin: 24px 0; overflow: hidden; }
-        .timer-progress-bar { height: 100%; background: var(--accent-gold); border-radius: 3px; transition: width 0.5s linear; }
-        .timer-controls { display: flex; justify-content: center; gap: 16px; margin-top: 24px; }
-        .timer-btn { padding: 14px 28px; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; }
-        .timer-btn.primary { background: var(--accent-gold); color: var(--bg-primary); }
-        .timer-btn.secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-medium); }
-        .timer-btn:hover { opacity: 0.9; }
 
         /* Health Grid */
         .health-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .health-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; }
+        .health-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm); }
         .health-icon { font-size: 24px; margin-bottom: 8px; }
         .health-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.1em; }
-        .health-value { font-family: var(--font-display); font-size: 24px; color: var(--text-primary); }
         .health-value input { background: transparent; border: none; color: var(--text-primary); font-family: var(--font-display); font-size: 24px; width: 80px; outline: none; }
         .health-unit { font-size: 12px; color: var(--text-muted); font-family: var(--font-sans); }
 
-        /* Note Section */
-        .note-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; }
+        /* Note Card */
+        .note-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
         .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .note-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; }
         .note-textarea { width: 100%; min-height: 120px; background: transparent; border: none; color: var(--text-primary); font-family: var(--font-serif); font-size: 14px; line-height: 1.9; resize: none; outline: none; }
@@ -166,10 +226,78 @@
         .uploaded-image img { width: 100%; height: 100%; object-fit: cover; }
         .uploaded-image .remove-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
+        /* News Section */
+        .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .keyword-tag { 
+            padding: 8px 14px; 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: 20px; 
+            font-size: 13px; 
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+        .keyword-tag:hover { border-color: var(--accent-gold); }
+        .keyword-tag .remove { font-size: 16px; opacity: 0.6; line-height: 1; }
+        .keyword-tag .remove:hover { opacity: 1; }
+        .add-keyword-btn { padding: 8px 14px; background: transparent; border: 2px dashed var(--border-medium); border-radius: 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+        .add-keyword-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+        
+        .news-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: var(--radius-lg); 
+            overflow: hidden; 
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .news-card-header { 
+            padding: 14px 16px; 
+            border-bottom: 1px solid var(--border-subtle); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: var(--accent-gold-dim);
+        }
+        .news-keyword { font-size: 14px; color: var(--accent-gold); font-weight: 500; }
+        .news-link-btn { 
+            background: var(--accent-gold); 
+            border: none; 
+            color: var(--bg-primary); 
+            padding: 6px 12px; 
+            border-radius: 16px; 
+            font-size: 11px; 
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .news-link-btn:hover { opacity: 0.9; }
+        .news-list { max-height: 250px; overflow-y: auto; }
+        .news-item { 
+            padding: 14px 16px; 
+            border-bottom: 1px solid var(--border-subtle); 
+            cursor: pointer; 
+            transition: background 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        .news-item:last-child { border-bottom: none; }
+        .news-item:hover { background: var(--bg-card-hover); }
+        .news-item-title { font-size: 13px; color: var(--text-primary); line-height: 1.6; margin-bottom: 6px; }
+        .news-item-meta { display: flex; justify-content: space-between; align-items: center; }
+        .news-item-source { font-size: 11px; color: var(--text-muted); }
+        .news-loading { padding: 30px 16px; text-align: center; font-size: 13px; color: var(--text-muted); }
+
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal { background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: var(--radius-xl); width: 100%; max-width: 360px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s ease; }
+        .modal { background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: var(--radius-xl); width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s ease; box-shadow: var(--shadow-md); }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); }
         .modal-title { font-family: var(--font-serif); font-size: 18px; color: var(--text-primary); }
@@ -178,14 +306,22 @@
 
         /* Settings */
         .settings-section { margin-bottom: 24px; }
-        .settings-section-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
-        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin-bottom: 8px; }
-        .settings-item-label { font-size: 14px; color: var(--text-primary); }
-        .settings-item-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .settings-section-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .settings-item { padding: 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin-bottom: 8px; }
+        .settings-item-label { font-size: 14px; color: var(--text-primary); margin-bottom: 4px; }
+        .settings-item-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
         .time-input-group { display: flex; align-items: center; gap: 8px; }
-        .time-input { background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary); font-family: var(--font-display); font-size: 16px; width: 80px; text-align: center; outline: none; }
+        .time-input { background: var(--bg-secondary); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text-primary); font-family: var(--font-display); font-size: 18px; width: 100px; text-align: center; outline: none; }
         .time-input:focus { border-color: var(--accent-gold); }
-        .time-separator { color: var(--text-muted); }
+        .time-separator { color: var(--text-muted); font-size: 18px; }
+
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+        .form-input { width: 100%; padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-sans); font-size: 14px; outline: none; }
+        .form-input:focus { border-color: var(--accent-gold); }
+        .btn-primary { width: 100%; padding: 14px; background: var(--accent-gold); border: none; border-radius: var(--radius-md); color: white; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer; }
+        .btn-primary:hover { opacity: 0.9; }
 
         /* Calendar */
         .calendar { width: 100%; }
@@ -195,26 +331,26 @@
         .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
         .calendar-weekday { text-align: center; font-size: 11px; color: var(--text-muted); padding: 8px 0; }
         .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text-secondary); background: none; border: none; border-radius: 50%; cursor: pointer; transition: all 0.2s; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text-secondary); background: none; border: none; border-radius: 50%; cursor: pointer; transition: all 0.2s; position: relative; }
         .calendar-day:hover { background: var(--border-subtle); }
         .calendar-day.today { border: 1px solid var(--accent-gold); color: var(--accent-gold); }
-        .calendar-day.selected { background: var(--accent-gold); color: var(--bg-primary); }
+        .calendar-day.selected { background: var(--accent-gold); color: white; }
         .calendar-day.other-month { opacity: 0.3; }
 
         /* Week View */
         .week-calendar { display: flex; gap: 6px; margin-bottom: 24px; overflow-x: auto; padding: 4px 0; }
-        .week-day { flex: 1; min-width: 44px; text-align: center; padding: 12px 8px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+        .week-day { flex: 1; min-width: 44px; text-align: center; padding: 12px 8px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
         .week-day:hover { border-color: var(--border-medium); }
         .week-day.active { background: var(--accent-gold-dim); border-color: var(--accent-gold); }
         .week-day-name { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
         .week-day-num { font-family: var(--font-display); font-size: 18px; color: var(--text-primary); }
         .week-day.active .week-day-num { color: var(--accent-gold); }
         .week-day-progress { width: 100%; height: 3px; background: var(--border-subtle); border-radius: 2px; margin-top: 8px; overflow: hidden; }
-        .week-day-progress-bar { height: 100%; background: var(--accent-sage); border-radius: 2px; transition: width 0.3s; }
+        .week-day-progress-bar { height: 100%; background: var(--accent-sage); border-radius: 2px; }
 
         /* Activity List */
         .activity-list { display: flex; flex-direction: column; gap: 8px; }
-        .activity-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px 16px; }
+        .activity-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow-sm); }
         .activity-info { display: flex; align-items: center; gap: 12px; }
         .activity-icon { font-size: 20px; }
         .activity-name { font-size: 14px; color: var(--text-primary); }
@@ -223,11 +359,11 @@
         .activity-status.scheduled { background: var(--accent-gold-dim); color: var(--accent-gold); }
 
         /* Book List */
-        .book-list { display: flex; flex-direction: column; gap: 10px; }
-        .book-item { display: flex; align-items: flex-start; gap: 14px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; cursor: pointer; transition: all 0.2s; }
+        .book-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        .book-item { display: flex; align-items: flex-start; gap: 14px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
         .book-item:hover { border-color: var(--border-medium); }
-        .book-item.completed { background: var(--accent-sage-dim); border-color: rgba(143, 166, 138, 0.3); }
-        .book-checkbox { width: 22px; height: 22px; border: 2px solid var(--text-muted); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: all 0.2s; }
+        .book-item.completed { background: var(--accent-sage-dim); border-color: rgba(107, 143, 113, 0.3); }
+        .book-checkbox { width: 22px; height: 22px; border: 2px solid var(--text-muted); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
         .book-item.completed .book-checkbox { background: var(--accent-sage); border-color: var(--accent-sage); }
         .book-checkbox svg { width: 14px; height: 14px; color: transparent; }
         .book-item.completed .book-checkbox svg { color: var(--bg-primary); }
@@ -235,15 +371,15 @@
         .book-title { font-size: 14px; color: var(--text-primary); margin-bottom: 3px; }
         .book-author { font-size: 12px; color: var(--text-muted); }
         .book-item.completed .book-title { text-decoration: line-through; opacity: 0.7; }
-        .add-book-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: transparent; border: 2px dashed var(--border-medium); border-radius: var(--radius-md); color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .add-book-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: transparent; border: 2px dashed var(--border-medium); border-radius: var(--radius-md); color: var(--text-muted); font-size: 13px; cursor: pointer; }
         .add-book-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
 
         /* Goals */
-        .goal-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+        .goal-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
         .goal-card:hover { border-color: var(--border-medium); }
-        .goal-card.completed { background: var(--accent-sage-dim); border-color: rgba(143, 166, 138, 0.3); }
+        .goal-card.completed { background: var(--accent-sage-dim); border-color: rgba(107, 143, 113, 0.3); }
         .goal-header { display: flex; align-items: flex-start; gap: 14px; }
-        .goal-checkbox { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+        .goal-checkbox { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .goal-card.completed .goal-checkbox { background: var(--accent-sage); border-color: var(--accent-sage); }
         .goal-checkbox svg { width: 14px; height: 14px; color: transparent; }
         .goal-card.completed .goal-checkbox svg { color: var(--bg-primary); }
@@ -255,12 +391,17 @@
         /* Month Tabs */
         .month-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 16px; margin-bottom: 16px; }
         .month-tabs::-webkit-scrollbar { display: none; }
-        .month-tab { flex-shrink: 0; padding: 10px 18px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+        .month-tab { flex-shrink: 0; padding: 10px 18px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); cursor: pointer; box-shadow: var(--shadow-sm); }
         .month-tab:hover { border-color: var(--border-medium); }
         .month-tab.active { background: var(--accent-gold-dim); border-color: var(--accent-gold); color: var(--accent-gold); }
 
         /* Five Year Plan */
-        .plan-year-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; }
+        .plan-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; }
+        .plan-tab { flex-shrink: 0; padding: 12px 20px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font-family: var(--font-display); font-size: 18px; color: var(--text-secondary); cursor: pointer; box-shadow: var(--shadow-sm); }
+        .plan-tab.active { background: var(--accent-gold-dim); border-color: var(--accent-gold); color: var(--accent-gold); }
+        
+        .plan-year-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+        .plan-year-card.current { background: linear-gradient(145deg, var(--accent-gold-dim) 0%, var(--bg-card) 40%); }
         .plan-year-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
         .plan-year { font-family: var(--font-display); font-size: 36px; color: var(--accent-gold); }
         .plan-year-theme { font-family: var(--font-serif); font-size: 18px; color: var(--text-primary); margin-top: 4px; }
@@ -271,44 +412,46 @@
         .plan-breakdown-item { text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); }
         .plan-breakdown-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
         .plan-breakdown-value { font-size: 14px; color: var(--text-primary); }
-        .plan-milestones { border-top: 1px solid var(--border-subtle); padding-top: 16px; }
+        .plan-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+        .plan-section-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+        .plan-milestones { display: flex; flex-direction: column; gap: 8px; }
         .plan-milestone { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
         .plan-milestone-dot { width: 8px; height: 8px; background: var(--accent-gold); border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
         .plan-milestone-text { font-size: 13px; color: var(--text-secondary); }
+        .plan-quarter { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
+        .plan-quarter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .plan-quarter-name { font-weight: 500; color: var(--text-primary); }
+        .plan-quarter-revenue { font-family: var(--font-display); color: var(--accent-gold); }
+        .plan-quarter-events { font-size: 13px; color: var(--text-secondary); }
 
         /* Stats */
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
-        .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; text-align: center; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; text-align: center; box-shadow: var(--shadow-sm); }
         .stat-value { font-family: var(--font-display); font-size: 36px; color: var(--accent-gold); margin-bottom: 4px; }
         .stat-label { font-size: 12px; color: var(--text-muted); }
 
         /* Guidelines */
-        .guidelines { background: linear-gradient(145deg, var(--accent-gold-dim) 0%, transparent 60%); border: 1px solid rgba(212, 165, 116, 0.2); border-radius: var(--radius-xl); padding: 24px; }
+        .guidelines { background: linear-gradient(145deg, var(--accent-gold-dim) 0%, var(--bg-card) 60%); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-sm); }
         .guideline-item { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); }
         .guideline-item:last-child { border-bottom: none; padding-bottom: 0; }
         .guideline-icon { width: 32px; height: 32px; background: var(--accent-gold-dim); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .guideline-icon svg { width: 16px; height: 16px; color: var(--accent-gold); }
         .guideline-text { font-family: var(--font-serif); font-size: 14px; color: var(--text-primary); line-height: 1.7; }
 
-        /* Form */
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
-        .form-input { width: 100%; padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-sans); font-size: 14px; outline: none; transition: border-color 0.2s; }
-        .form-input:focus { border-color: var(--accent-gold); }
-        .btn-primary { width: 100%; padding: 14px; background: var(--accent-gold); border: none; border-radius: var(--radius-md); color: var(--bg-primary); font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-        .btn-primary:hover { opacity: 0.9; }
-
         /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13, 13, 20, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border-subtle); padding: 12px 0 calc(var(--safe-bottom) + 8px); z-index: 100; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-primary); border-top: 1px solid var(--border-subtle); padding: 10px 0 calc(var(--safe-bottom) + 6px); z-index: 100; transition: background 0.5s ease; }
         .nav-list { display: flex; justify-content: space-around; max-width: 480px; margin: 0 auto; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 16px; background: none; border: none; color: var(--text-muted); font-size: 10px; cursor: pointer; transition: color 0.2s; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 10px; background: none; border: none; color: var(--text-muted); font-size: 9px; cursor: pointer; transition: color 0.2s; }
         .nav-item:hover { color: var(--text-secondary); }
         .nav-item.active { color: var(--accent-gold); }
-        .nav-item svg { width: 24px; height: 24px; }
+        .nav-item svg { width: 22px; height: 22px; }
 
         /* Toast */
-        .toast { position: fixed; bottom: calc(90px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent-sage); color: var(--bg-primary); padding: 12px 24px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 200; }
+        .toast { position: fixed; bottom: calc(90px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent-sage); color: white; padding: 12px 24px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 200; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
+        /* Theme indicator */
+        .theme-indicator { font-size: 11px; color: var(--text-muted); margin-left: 8px; }
     </style>
 </head>
 <body>
@@ -318,151 +461,83 @@
                 <div class="logo">余白<span>2026</span></div>
                 <div class="header-actions">
                     <button class="header-btn" onclick="openSettings()" title="設定">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                        </svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </button>
                 </div>
             </div>
             <div class="date-nav">
-                <button id="prevDay">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <div class="current-date" id="currentDate" onclick="openCalendar()">
-                    <span class="date-text"></span>
-                    <span class="weekday"></span>
-                </div>
-                <button id="nextDay">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
+                <button id="prevDay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <div class="current-date" id="currentDate" onclick="openCalendar()"><span class="date-text"></span><span class="weekday"></span></div>
+                <button id="nextDay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
             </div>
         </header>
-
         <main class="main">
             <!-- Today View -->
             <div class="view active" id="todayView">
                 <div class="time-section">
                     <div class="current-time" id="currentTime">00:00</div>
                     <div class="time-period" id="timePeriod"></div>
-                    <div class="routine-indicator">
-                        <span class="routine-badge" id="morningBadge">🌅 朝 <span id="morningTimeRange">6:00-9:00</span></span>
-                        <span class="routine-badge evening" id="eveningBadge">🌙 夜 <span id="eveningTimeRange">21:00-24:00</span></span>
-                    </div>
                 </div>
-
-                <div class="quote-card">
-                    <p class="quote-text" id="dailyQuote"></p>
-                    <p class="quote-source">— 質量と余白の間で</p>
-                </div>
-
+                <div class="quote-card"><p class="quote-text" id="dailyQuote"></p><p class="quote-source">— 質量と余白の間で</p></div>
                 <div class="month-card">
                     <div class="month-card-header">
-                        <div>
-                            <div class="month-label">今月のテーマ</div>
-                            <div class="month-theme" id="monthTheme">始動</div>
-                        </div>
-                        <div class="month-revenue">
-                            <div class="month-revenue-label">目標月商</div>
-                            <div class="month-revenue-value" id="monthRevenue">¥20万</div>
-                        </div>
+                        <div><div class="month-label">今月のテーマ</div><div class="month-theme" id="monthTheme">始動</div></div>
+                        <div class="month-revenue"><div class="month-revenue-label">目標月商</div><div class="month-revenue-value" id="monthRevenue">¥20万</div></div>
                     </div>
                     <p class="month-quote" id="monthQuote"></p>
                 </div>
-
                 <div class="section" id="morningSection">
-                    <div class="section-header">
-                        <span class="section-title">朝のルーティン</span>
-                        <span class="section-time-badge" id="morningTimeBadge">6:00 - 9:00</span>
-                    </div>
-                    <div class="section-header">
-                        <span></span>
-                        <span class="section-progress" id="morningProgress">0/5</span>
-                    </div>
+                    <div class="section-header"><span class="section-title">朝のルーティン</span><span class="section-badge morning" id="morningTimeBadge" onclick="openSettings()">6:00 - 9:00</span></div>
+                    <div class="section-header"><span></span><span class="section-progress" id="morningProgress">0/5</span></div>
                     <div class="habit-list" id="morningHabits"></div>
                 </div>
-
                 <div class="section" id="eveningSection">
-                    <div class="section-header">
-                        <span class="section-title">夜のルーティン</span>
-                        <span class="section-time-badge" id="eveningTimeBadge">21:00 - 24:00</span>
-                    </div>
-                    <div class="section-header">
-                        <span></span>
-                        <span class="section-progress" id="eveningProgress">0/4</span>
-                    </div>
+                    <div class="section-header"><span class="section-title">夜のルーティン</span><span class="section-badge evening" id="eveningTimeBadge" onclick="openSettings()">21:00 - 24:00</span></div>
+                    <div class="section-header"><span></span><span class="section-progress" id="eveningProgress">0/4</span></div>
                     <div class="habit-list" id="eveningHabits"></div>
                 </div>
-
-                <div class="section">
-                    <div class="section-header">
-                        <span class="section-title">ヘルスケア</span>
-                    </div>
-                    <div class="health-grid" id="healthGrid"></div>
-                </div>
-
+                <div class="section"><div class="section-header"><span class="section-title">ヘルスケア</span></div><div class="health-grid" id="healthGrid"></div></div>
                 <div class="section">
                     <div class="note-card">
-                        <div class="note-header">
-                            <span class="note-title">今日の記録</span>
-                        </div>
+                        <div class="note-header"><span class="note-title">今日の記録</span></div>
                         <textarea class="note-textarea" id="dailyNote" placeholder="今日の気づき、感謝、振り返りを記録する..."></textarea>
-                        <div class="image-upload-area" id="imageUploadArea">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="8.5" cy="8.5" r="1.5"/>
-                                <path d="M21 15l-5-5L5 21"/>
-                            </svg>
-                            <p>画像を追加</p>
-                        </div>
+                        <div class="image-upload-area" id="imageUploadArea"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>画像を追加</p></div>
                         <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
                         <div class="uploaded-images" id="uploadedImages"></div>
                     </div>
                 </div>
             </div>
-
+            
+            <!-- News View -->
+            <div class="view" id="newsView">
+                <div class="section">
+                    <div class="section-header"><span class="section-title">ニュースキーワード</span></div>
+                    <div class="keyword-tags" id="keywordTags"></div>
+                </div>
+                <div id="newsContainer"></div>
+            </div>
+            
             <!-- Week View -->
             <div class="view" id="weekView">
                 <div class="week-calendar" id="weekCalendar"></div>
-                <div class="section">
-                    <div class="section-header"><span class="section-title">週間アクティビティ</span></div>
-                    <div class="activity-list" id="weeklyActivities"></div>
-                </div>
-                <div class="section">
-                    <div class="section-header">
-                        <span class="section-title">今月の読書</span>
-                        <span class="section-progress" id="bookProgress">0/5</span>
-                    </div>
-                    <div class="book-list" id="bookList"></div>
-                    <button class="add-book-btn" onclick="openAddBookModal()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                        本を追加
-                    </button>
-                </div>
+                <div class="section"><div class="section-header"><span class="section-title">週間アクティビティ</span></div><div class="activity-list" id="weeklyActivities"></div></div>
+                <div class="section"><div class="section-header"><span class="section-title">今月の読書</span><span class="section-progress" id="bookProgress">0/5</span></div><div class="book-list" id="bookList"></div><button class="add-book-btn" onclick="openAddBookModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>本を追加</button></div>
             </div>
-
+            
             <!-- Goals View -->
             <div class="view" id="goalsView">
-                <div class="section">
-                    <div class="section-header"><span class="section-title">2026年 年間目標</span></div>
-                    <div id="yearGoals"></div>
-                </div>
+                <div class="section"><div class="section-header"><span class="section-title">2026年 年間目標</span></div><div id="yearGoals"></div></div>
                 <div class="month-tabs" id="monthTabs"></div>
-                <div class="section">
-                    <div class="section-header"><span class="section-title" id="monthGoalsTitle">1月の目標</span></div>
-                    <div id="monthGoals"></div>
-                </div>
+                <div class="section"><div class="section-header"><span class="section-title" id="monthGoalsTitle">1月の目標</span></div><div id="monthGoals"></div></div>
             </div>
-
+            
             <!-- Plan View -->
             <div class="view" id="planView">
-                <div class="quote-card" style="margin-bottom: 24px;">
-                    <p class="quote-text">質量と余白の間で。2030年へ向けて。</p>
-                    <p class="quote-source">— 豊かな後悔の多い人生を</p>
-                </div>
+                <div class="quote-card" style="margin-bottom: 24px;"><p class="quote-text">質量と余白の間で。2030年へ向けて。</p><p class="quote-source">— 豊かな後悔の多い人生を</p></div>
+                <div class="plan-tabs" id="planTabs"></div>
                 <div id="fiveYearPlan"></div>
             </div>
-
+            
             <!-- Stats View -->
             <div class="view" id="statsView">
                 <div class="stats-grid">
@@ -473,164 +548,45 @@
                 </div>
                 <div class="guidelines">
                     <div class="section-title" style="margin-bottom: 16px;">年間指針</div>
-                    <div class="guideline-item">
-                        <div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg></div>
-                        <p class="guideline-text">批評家にならず、手を動かし続ける</p>
-                    </div>
-                    <div class="guideline-item">
-                        <div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-                        <p class="guideline-text">脆弱性を認め合う関係性を作る</p>
-                    </div>
-                    <div class="guideline-item">
-                        <div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-                        <p class="guideline-text">不可逆性と一回性を大切にする</p>
-                    </div>
-                    <div class="guideline-item">
-                        <div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                        <p class="guideline-text">エッセンシャルワーカーが誰よりも幸せであってほしい</p>
-                    </div>
+                    <div class="guideline-item"><div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg></div><p class="guideline-text">批評家にならず、手を動かし続ける</p></div>
+                    <div class="guideline-item"><div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><p class="guideline-text">脆弱性を認め合う関係性を作る</p></div>
+                    <div class="guideline-item"><div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><p class="guideline-text">不可逆性と一回性を大切にする</p></div>
+                    <div class="guideline-item"><div class="guideline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><p class="guideline-text">エッセンシャルワーカーが誰よりも幸せであってほしい</p></div>
                 </div>
             </div>
         </main>
-
+        
         <nav class="bottom-nav">
             <div class="nav-list">
-                <button class="nav-item active" data-view="todayView">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>今日
-                </button>
-                <button class="nav-item" data-view="weekView">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>週間
-                </button>
-                <button class="nav-item" data-view="goalsView">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>目標
-                </button>
-                <button class="nav-item" data-view="planView">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>5年計画
-                </button>
-                <button class="nav-item" data-view="statsView">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>統計
-                </button>
+                <button class="nav-item active" data-view="todayView"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>今日</button>
+                <button class="nav-item" data-view="newsView"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 12h6"/></svg>ニュース</button>
+                <button class="nav-item" data-view="weekView"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>週間</button>
+                <button class="nav-item" data-view="goalsView"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>目標</button>
+                <button class="nav-item" data-view="planView"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>計画</button>
+                <button class="nav-item" data-view="statsView"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>統計</button>
             </div>
         </nav>
     </div>
 
-    <!-- Calendar Modal -->
-    <div class="modal-overlay" id="calendarModal">
-        <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title">日付を選択</span>
-                <button class="modal-close" onclick="closeCalendar()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="calendar">
-                    <div class="calendar-nav">
-                        <button onclick="prevMonth()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <span class="calendar-month" id="calendarMonth"></span>
-                        <button onclick="nextMonth()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
-                    </div>
-                    <div class="calendar-weekdays"><div class="calendar-weekday">日</div><div class="calendar-weekday">月</div><div class="calendar-weekday">火</div><div class="calendar-weekday">水</div><div class="calendar-weekday">木</div><div class="calendar-weekday">金</div><div class="calendar-weekday">土</div></div>
-                    <div class="calendar-days" id="calendarDays"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title">ルーティン設定</span>
-                <button class="modal-close" onclick="closeSettings()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="settings-section">
-                    <div class="settings-section-title">🌅 朝のルーティン時間</div>
-                    <div class="settings-item">
-                        <div>
-                            <div class="settings-item-label">開始 〜 終了</div>
-                            <div class="settings-item-desc">この時間帯に朝ルーティンがハイライトされます</div>
-                        </div>
-                    </div>
-                    <div class="settings-item">
-                        <div class="time-input-group">
-                            <input type="time" class="time-input" id="morningStart" value="06:00">
-                            <span class="time-separator">〜</span>
-                            <input type="time" class="time-input" id="morningEnd" value="09:00">
-                        </div>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <div class="settings-section-title">🌙 夜のルーティン時間</div>
-                    <div class="settings-item">
-                        <div>
-                            <div class="settings-item-label">開始 〜 終了</div>
-                            <div class="settings-item-desc">この時間帯に夜ルーティンがハイライトされます</div>
-                        </div>
-                    </div>
-                    <div class="settings-item">
-                        <div class="time-input-group">
-                            <input type="time" class="time-input" id="eveningStart" value="21:00">
-                            <span class="time-separator">〜</span>
-                            <input type="time" class="time-input" id="eveningEnd" value="23:59">
-                        </div>
-                    </div>
-                </div>
-                <button class="btn-primary" onclick="saveSettings()">保存する</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Timer Modal -->
-    <div class="modal-overlay" id="timerModal">
-        <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title" id="timerTitle">タイマー</span>
-                <button class="modal-close" onclick="closeTimer()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="timer-display">
-                    <div class="timer-value" id="timerValue">00:00</div>
-                    <div class="timer-label" id="timerLabel">残り時間</div>
-                    <div class="timer-progress">
-                        <div class="timer-progress-bar" id="timerProgressBar" style="width: 100%"></div>
-                    </div>
-                </div>
-                <div class="timer-controls">
-                    <button class="timer-btn secondary" onclick="resetTimer()">リセット</button>
-                    <button class="timer-btn primary" id="timerStartBtn" onclick="toggleTimer()">開始</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Book Modal -->
-    <div class="modal-overlay" id="addBookModal">
-        <div class="modal">
-            <div class="modal-header">
-                <span class="modal-title">本を追加</span>
-                <button class="modal-close" onclick="closeAddBookModal()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">タイトル</label>
-                    <input type="text" class="form-input" id="bookTitleInput" placeholder="本のタイトル">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">著者</label>
-                    <input type="text" class="form-input" id="bookAuthorInput" placeholder="著者名">
-                </div>
-                <button class="btn-primary" onclick="addCustomBook()">追加する</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Modals -->
+    <div class="modal-overlay" id="calendarModal"><div class="modal"><div class="modal-header"><span class="modal-title">日付を選択</span><button class="modal-close" onclick="closeCalendar()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body"><div class="calendar"><div class="calendar-nav"><button onclick="prevMonth()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><span class="calendar-month" id="calendarMonth"></span><button onclick="nextMonth()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button></div><div class="calendar-weekdays"><div class="calendar-weekday">日</div><div class="calendar-weekday">月</div><div class="calendar-weekday">火</div><div class="calendar-weekday">水</div><div class="calendar-weekday">木</div><div class="calendar-weekday">金</div><div class="calendar-weekday">土</div></div><div class="calendar-days" id="calendarDays"></div></div></div></div></div>
+    
+    <div class="modal-overlay" id="settingsModal"><div class="modal"><div class="modal-header"><span class="modal-title">ルーティン時間設定</span><button class="modal-close" onclick="closeSettings()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body">
+        <div class="settings-section"><div class="settings-section-title">🌅 朝のルーティン開始時刻</div><div class="settings-item"><div class="settings-item-label">開始時刻を設定</div><div class="settings-item-desc">この時刻から朝ルーティンが始まります</div><div class="time-input-group"><input type="time" class="time-input" id="morningStart" value="06:00"></div></div></div>
+        <div class="settings-section"><div class="settings-section-title">🌙 夜のルーティン開始時刻</div><div class="settings-item"><div class="settings-item-label">開始時刻を設定</div><div class="settings-item-desc">この時刻から夜ルーティンが始まります</div><div class="time-input-group"><input type="time" class="time-input" id="eveningStart" value="21:00"></div></div></div>
+        <button class="btn-primary" onclick="saveSettings()">保存する</button>
+    </div></div></div>
+    
+    <div class="modal-overlay" id="addBookModal"><div class="modal"><div class="modal-header"><span class="modal-title">本を追加</span><button class="modal-close" onclick="closeAddBookModal()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body"><div class="form-group"><label class="form-label">タイトル</label><input type="text" class="form-input" id="bookTitleInput" placeholder="本のタイトル"></div><div class="form-group"><label class="form-label">著者</label><input type="text" class="form-input" id="bookAuthorInput" placeholder="著者名"></div><button class="btn-primary" onclick="addCustomBook()">追加する</button></div></div></div>
+    
+    <div class="modal-overlay" id="addKeywordModal"><div class="modal"><div class="modal-header"><span class="modal-title">キーワードを追加</span><button class="modal-close" onclick="closeAddKeywordModal()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body"><div class="form-group"><label class="form-label">キーワード</label><input type="text" class="form-input" id="keywordInput" placeholder="例: AI, 認知症, アート"></div><button class="btn-primary" onclick="addKeyword()">追加する</button></div></div></div>
+    
     <div class="toast" id="toast">保存しました</div>
 
     <script>
         // ============================================
         // DATA
         // ============================================
-        
         const QUOTES = [
             "エッセンシャルワーカーが誰よりも幸せであってほしい。この祈りを、祈りのままにしない。",
             "豊かな後悔とは、起こらなかったことや起こさなかった過去を責めるのではなく、起こらなかったまま美しく残しておく態度のことだ。",
@@ -644,19 +600,8 @@
             "人間からすべてを奪うことができる。ただ一つのことを除いて。それは、与えられた環境の中で自らの態度を選ぶという、人間の最後の自由である。",
             "なぜ生きるかを知っている者は、どのように生きることにも耐える。",
             "私たちの時間は有限だ。限られた時間の中で、何を大切にし、何を選び取るか。",
-            "偶然に出会った人は、偶然のまま消えていく。でもあの瞬間、私は自分が誰だったのかは思い出していた。",
-            "今日という日を最後の対話のように。最後のまなざしのように。",
-            "余白を守ることは、受動的な行為ではない。積極的に余白を確保し、維持し、育てることが必要だ。",
-            "すべての主体は、自分だけに開かれた世界の中心に存在し、自分だけの舞台装置の中にいる。",
-            "顔は、『汝、殺すなかれ』と語る。",
-            "責任は、私の自由に先立つ。",
-            "苦悩そのものが問いかけているのだ——その苦悩は意味を持つか、と。",
-            "共感とは、相手の経験の中に、評価なしに存在することである。",
             "質量と余白の間で。豊かな後悔の多い人生を。",
-            "私に必要な経験をください。まだあるとするのなら、それを私にください。",
-            "大切なこととして、これからも偶然に出会える身体のままでいたいと、つくづく思う。",
-            "私たちには「もう二度と起きないかもしれない」という不確かさが与えられている。だからこそ、また「何かが起きてしまうかもしれない」という希望が残されている。",
-            "問いを持つこと自体に意味がある。問いを持つことで、私たちは世界に対して開かれた状態を保つことができる。"
+            "私に必要な経験をください。まだあるとするのなら、それを私にください。"
         ];
 
         const MONTHS = {
@@ -685,53 +630,136 @@
             { text: 'スイス渡航', deadline: '12月' }
         ];
 
+        // 朝ルーティン（所要時間分単位）
         const MORNING_HABITS = [
-            { id: 'wake', name: '起床・白湯', time: '6:00', duration: 10 },
-            { id: 'meditation', name: '瞑想', time: '15分', duration: 15 },
-            { id: 'walk', name: '朝散歩', time: '30分', duration: 30 },
-            { id: 'exercise', name: 'トレーニング', time: '15分', duration: 15 },
-            { id: 'breakfast', name: '朝食（腸活メニュー）', time: '7:30', duration: 20 }
+            { id: 'wake', name: '起床・白湯', duration: 5 },
+            { id: 'meditation', name: '瞑想', duration: 15 },
+            { id: 'walk', name: '朝散歩', duration: 30 },
+            { id: 'exercise', name: 'トレーニング', duration: 15 },
+            { id: 'breakfast', name: '朝食（腸活メニュー）', duration: 30 }
         ];
 
+        // 夜ルーティン（所要時間分単位）
         const EVENING_HABITS = [
-            { id: 'reading', name: '読書', time: '30分-1時間', duration: 45 },
-            { id: 'study', name: 'MBA学習 or ドラム練習', time: '30分', duration: 30 },
-            { id: 'journal', name: '日記・振り返り', time: '15分', duration: 15 },
-            { id: 'night_meditation', name: '入浴・瞑想', time: '21:30', duration: 20 }
+            { id: 'reading', name: '読書', duration: 45 },
+            { id: 'study', name: 'MBA学習 or ドラム練習', duration: 30 },
+            { id: 'journal', name: '日記・振り返り', duration: 15 },
+            { id: 'night_meditation', name: '入浴・瞑想', duration: 30 }
         ];
 
         const WEEKLY_ACTIVITIES = [
             { id: 'mba', name: 'MBA学習', icon: '📚', day: '月・水・日' },
             { id: 'drum', name: 'ドラム練習', icon: '🥁', day: '火・木' },
             { id: 'nvc', name: 'NVCセッション', icon: '💬', day: '火' },
-            { id: 'film', name: 'フィルム撮影', icon: '📷', day: '金' },
+            { id: 'film', name: 'フィルム撮影', icon: '📷', day: '土・日' },
             { id: 'art', name: '美術展', icon: '🎨', day: '土・日' },
-            { id: 'tea', name: '茶道', icon: '🍵', day: '土（隔週）' },
-            { id: 'fasting', name: '24hファスティング', icon: '🌙', day: '土夜〜日夜' }
+            { id: 'tea', name: '茶道', icon: '🍵', day: '月1回 土曜' },
+            { id: 'fasting', name: '24hファスティング', icon: '🌙', day: '月1回' }
         ];
 
         const MONTHLY_BOOKS = {
             1: [{ title: 'プロフェッショナル原論', author: '波頭亮' }, { title: 'ケアの倫理', author: '岡野八代' }, { title: '存在と時間（入門書）', author: 'ハイデガー' }, { title: '人間失格', author: '太宰治' }, { title: '現代アートとは何か', author: '小崎哲哉' }],
             2: [{ title: 'もうひとつの声で', author: 'ギリガン' }, { title: 'MBAファイナンス', author: 'グロービス' }, { title: '論語（新訳）', author: '' }, { title: 'こころ', author: '夏目漱石' }, { title: '美術の物語', author: 'ゴンブリッチ' }],
-            3: [{ title: 'ケアの倫理と共感', author: 'スロート' }, { title: 'NVC 人と人との関係にいのちを吹き込む法', author: 'ローゼンバーグ' }, { title: '善悪の彼岸', author: 'ニーチェ' }, { title: 'グレート・ギャツビー', author: 'フィッツジェラルド' }, { title: '写真の歴史', author: '' }],
-            4: [{ title: '明るい部屋', author: 'バルト' }, { title: '写真論', author: 'ソンタグ' }, { title: '純粋理性批判（入門書）', author: 'カント' }, { title: '異邦人', author: 'カミュ' }, { title: 'アート・スピリット', author: 'ロバート・ヘンライ' }],
-            5: [{ title: '2030年の世界地図帳', author: '落合陽一' }, { title: 'デジタルネイチャー', author: '落合陽一' }, { title: '方法序説', author: 'デカルト' }, { title: '1984年', author: 'オーウェル' }, { title: '芸術の意味', author: 'リード' }],
-            6: [{ title: 'ピーター・パンとウェンディ', author: 'バリー' }, { title: 'いのちはのちのいのちへ', author: '稲葉俊郎' }, { title: 'エチカ（入門書）', author: 'スピノザ' }, { title: '星の王子さま', author: 'サン=テグジュペリ' }],
-            7: [{ title: '他者の苦痛へのまなざし', author: 'ソンタグ' }, { title: '夜と霧', author: 'フランクル' }, { title: '全体性と無限（入門書）', author: 'レヴィナス' }, { title: '戦争と平和（抜粋）', author: 'トルストイ' }, { title: 'ゲルニカ関連書籍', author: '' }],
-            8: [{ title: '原爆詩集', author: '峠三吉' }, { title: 'ヒロシマ・ノート', author: '大江健三郎' }, { title: '死に至る病', author: 'キルケゴール' }, { title: '黒い雨', author: '井伏鱒二' }],
-            9: [{ title: '愛するということ', author: 'フロム' }, { title: '暇と退屈の倫理学', author: '國分功一郎' }, { title: 'コーチングの基本', author: '' }, { title: '罪と罰', author: 'ドストエフスキー' }, { title: 'アートの力', author: 'ドミニク・チェン' }],
-            10: [{ title: '生命とは何か', author: 'シュレーディンガー' }, { title: '生物から見た世界', author: 'ユクスキュル' }, { title: '現象学の理念', author: 'フッサール' }, { title: '変身', author: 'カフカ' }, { title: '芸術と脳', author: '' }],
-            11: [{ title: '贈与論', author: 'モース' }, { title: 'コンヴィヴィアリティのための道具', author: 'イリイチ' }, { title: '精神現象学（入門書）', author: 'ヘーゲル' }, { title: 'ノルウェイの森', author: '村上春樹' }, { title: 'スイス関連書籍', author: '' }],
-            12: [{ title: 'ツァラトゥストラ', author: 'ニーチェ' }, { title: '雪国', author: '川端康成' }, { title: '年間読書総括', author: '' }, { title: '2027年読書計画策定', author: '' }]
+            3: [{ title: 'ケアの倫理と共感', author: 'スロート' }, { title: 'NVC 人と人との関係にいのちを吹き込む法', author: 'ローゼンバーグ' }],
+            4: [{ title: '明るい部屋', author: 'バルト' }, { title: '写真論', author: 'ソンタグ' }],
+            5: [{ title: '2030年の世界地図帳', author: '落合陽一' }, { title: 'デジタルネイチャー', author: '落合陽一' }],
+            6: [{ title: 'いのちはのちのいのちへ', author: '稲葉俊郎' }],
+            7: [{ title: '他者の苦痛へのまなざし', author: 'ソンタグ' }, { title: '夜と霧', author: 'フランクル' }],
+            8: [{ title: '原爆詩集', author: '峠三吉' }, { title: 'ヒロシマ・ノート', author: '大江健三郎' }],
+            9: [{ title: '愛するということ', author: 'フロム' }, { title: '暇と退屈の倫理学', author: '國分功一郎' }],
+            10: [{ title: '生命とは何か', author: 'シュレーディンガー' }, { title: '生物から見た世界', author: 'ユクスキュル' }],
+            11: [{ title: '贈与論', author: 'モース' }],
+            12: [{ title: 'ツァラトゥストラ', author: 'ニーチェ' }, { title: '雪国', author: '川端康成' }]
         };
 
-        const FIVE_YEAR_PLAN = [
-            { year: 2026, theme: '基盤構築', revenue: '1,500万', breakdown: { pxdt: '900万', hb: '100万', yohaku: '500万' }, milestones: ['コーチング資格取得', 'フィルム写真展開催', '乃木坂引越し', 'スイス渡航'] },
-            { year: 2027, theme: '専門深化', revenue: '2,000万', breakdown: { pxdt: '1,100万', hb: '100万', yohaku: '800万' }, milestones: ['MBA全科目修了', 'バイク免許取得', 'ドラム初ライブ', 'yohaku月商100万安定化'] },
-            { year: 2028, theme: '事業拡大', revenue: '5,000万', breakdown: { pxdt: '1,300万', hb: '120万', yohaku: '3,580万' }, milestones: ['yohaku App ローンチ', 'チーム2名採用', 'ケア事業BtoB開始', 'バンド活動開始'] },
-            { year: 2029, theme: '多角化', revenue: '7,000万', breakdown: { pxdt: '1,500万', hb: '120万', yohaku: '5,380万' }, milestones: ['チーム5名体制', 'ケアSaaS着手', '自主企画ライブ', '海外展開リサーチ'] },
-            { year: 2030, theme: '統合', revenue: '1億', breakdown: { pxdt: '1,800万', hb: '120万', yohaku: '8,080万' }, milestones: ['年商1億達成', 'チーム10名', '5年連続写真展', '経済的自由の基盤確立'] }
-        ];
+        // 5年計画の詳細データ
+        const FIVE_YEAR_PLAN = {
+            2026: {
+                theme: '基盤構築', revenue: '1,500万',
+                breakdown: { pxdt: '900万', hb: '100万', yohaku: '500万' },
+                yohakuMonthly: '42万',
+                quarters: [
+                    { q: 'Q1', period: '1-3月', revenue: '20→30万', cumulative: '75万', events: 'コーチング資格研修開始' },
+                    { q: 'Q2', period: '4-6月', revenue: '35→50万', cumulative: '200万', events: '乃木坂引越し、PxDT上期評価' },
+                    { q: 'Q3', period: '7-9月', revenue: '50→60万', cumulative: '365万', events: 'コーチング資格取得' },
+                    { q: 'Q4', period: '10-12月', revenue: '70→100万', cumulative: '500万', events: '写真展、スイス、PxDT下期評価' }
+                ],
+                smartGoals: {
+                    business: ['PxDT：昇格（6月評価）、年収900万円達成', 'HERALBONY：月額8万円安定、年間100万円', 'yohaku：12月に月商100万円達成', 'コーチング資格：9月取得'],
+                    skill: ['MBA科目：年間12科目修了', '読書：57冊（月4-5冊）', '美術展：36回（月3回）'],
+                    artist: ['フィルム写真展：11月開催', 'ドラム：基礎習得、スタジオ練習週2回'],
+                    life: ['乃木坂引越し：4月', '体重60kg維持', 'スイス渡航：12月']
+                }
+            },
+            2027: {
+                theme: '専門深化', revenue: '2,000万',
+                breakdown: { pxdt: '1,100万', hb: '100万', yohaku: '800万' },
+                yohakuMonthly: '67万',
+                quarters: [
+                    { q: 'Q1', period: '1-3月', revenue: '50→60万', cumulative: '165万', events: 'コーチング顧客5名体制' },
+                    { q: 'Q2', period: '4-6月', revenue: '65→75万', cumulative: '375万', events: 'バイク免許取得、写真展企画' },
+                    { q: 'Q3', period: '7-9月', revenue: '75→85万', cumulative: '615万', events: 'ドラム初ライブ、ヨーロッパ旅行' },
+                    { q: 'Q4', period: '10-12月', revenue: '90→100万', cumulative: '800万', events: '写真展、yohaku App企画開始' }
+                ],
+                smartGoals: {
+                    business: ['PxDT：年収1,100万円', 'yohaku：月商100万円安定化', 'コーチング顧客：月5名継続', '講演：年8回'],
+                    skill: ['MBA：全科目修了', '読書：60冊', '美術展：36回'],
+                    artist: ['写真展：第2回開催', 'ドラム：初ライブ出演', 'ピアノ：基礎曲3曲習得'],
+                    life: ['バイク免許：取得', '海外旅行：ヨーロッパ']
+                }
+            },
+            2028: {
+                theme: '事業拡大', revenue: '5,000万',
+                breakdown: { pxdt: '1,300万', hb: '120万', yohaku: '3,580万' },
+                yohakuMonthly: '300万',
+                quarters: [
+                    { q: 'Q1', period: '1-3月', revenue: '150→200万', cumulative: '525万', events: 'チームメンバー採用開始' },
+                    { q: 'Q2', period: '4-6月', revenue: '220→270万', cumulative: '1,260万', events: 'yohaku Appβ版ローンチ' },
+                    { q: 'Q3', period: '7-9月', revenue: '280→300万', cumulative: '2,130万', events: 'バンド活動本格化' },
+                    { q: 'Q4', period: '10-12月', revenue: '310→330万', cumulative: '3,580万', events: '第3回写真展' }
+                ],
+                smartGoals: {
+                    business: ['yohaku：月商300万円達成', 'yohaku App：ローンチ、MAU 1,000', 'チーム：2名採用', 'ケア事業：BtoB研修10社導入'],
+                    skill: ['講演：年20回'],
+                    artist: ['写真展：第3回', 'ドラム：バンド加入 or 結成'],
+                    life: ['バイク購入・ツーリング開始', '海外：3回']
+                }
+            },
+            2029: {
+                theme: '多角化', revenue: '7,000万',
+                breakdown: { pxdt: '1,500万', hb: '120万', yohaku: '5,380万' },
+                yohakuMonthly: '450万',
+                quarters: [
+                    { q: 'Q1', period: '1-3月', revenue: '350→400万', cumulative: '1,125万', events: 'チーム5名化' },
+                    { q: 'Q2', period: '4-6月', revenue: '420→450万', cumulative: '2,430万', events: '海外市場調査' },
+                    { q: 'Q3', period: '7-9月', revenue: '460→480万', cumulative: '3,840万', events: '自主企画ライブ' },
+                    { q: 'Q4', period: '10-12月', revenue: '490→500万', cumulative: '5,380万', events: '第4回写真展（海外検討）' }
+                ],
+                smartGoals: {
+                    business: ['yohaku：月商500万円達成', 'チーム：5名体制', 'yohaku App：MAU 5,000', 'ケア事業：SaaS化着手'],
+                    skill: ['講演：年30回（業界認知確立）'],
+                    artist: ['写真展：第4回（海外検討）', 'ドラム：自主企画ライブ開催'],
+                    life: ['バイクツーリング：国内制覇計画', '海外：3回以上']
+                }
+            },
+            2030: {
+                theme: '統合', revenue: '1億',
+                breakdown: { pxdt: '1,800万', hb: '120万', yohaku: '8,080万' },
+                yohakuMonthly: '670万',
+                quarters: [
+                    { q: 'Q1', period: '1-3月', revenue: '550→600万', cumulative: '1,725万', events: '事業統合、効率化' },
+                    { q: 'Q2', period: '4-6月', revenue: '620→670万', cumulative: '3,660万', events: '海外展開本格化' },
+                    { q: 'Q3', period: '7-9月', revenue: '680→700万', cumulative: '5,730万', events: '音楽活動集大成' },
+                    { q: 'Q4', period: '10-12月', revenue: '720→800万', cumulative: '8,080万', events: '第5回写真展、年収1億達成' }
+                ],
+                smartGoals: {
+                    business: ['yohaku：年商1億円達成', 'チーム：10名体制', 'yohaku App：MAU 20,000', 'ケアSaaS：ARR 1,800万円'],
+                    skill: ['業界での認知：ケア×テクノロジーの第一人者'],
+                    artist: ['写真展：第5回（5年連続達成）', '音楽：アルバム制作 or 定期ライブ'],
+                    life: ['経済的自由の基盤確立', '海外：4回以上']
+                }
+            }
+        };
 
         const HEALTH_ITEMS = [
             { id: 'weight', label: '体重', icon: '⚖️', unit: 'kg', default: '60.0' },
@@ -740,43 +768,42 @@
             { id: 'water', label: '水分', icon: '💧', unit: 'L', default: '2.0' }
         ];
 
+        const DEFAULT_KEYWORDS = ['AI', '難聴', 'ヘラルボニー', 'アート', 'ピクシーダストテクノロジーズ', '認知症'];
+
         // ============================================
         // STATE
         // ============================================
-        
         let currentDate = new Date();
         let calendarViewDate = new Date();
         let selectedGoalMonth = 1;
+        let selectedPlanYear = 2026;
         let db = null;
-        
-        // Timer state
-        let timerInterval = null;
-        let timerRemaining = 0;
-        let timerTotal = 0;
-        let currentTimerHabit = null;
-        
-        // Settings defaults
-        let settings = {
-            morningStart: '06:00',
-            morningEnd: '09:00',
-            eveningStart: '21:00',
-            eveningEnd: '23:59'
-        };
+        let newsKeywords = [...DEFAULT_KEYWORDS];
+        let settings = { morningStart: '06:00', eveningStart: '21:00' };
+
+        // ============================================
+        // THEME
+        // ============================================
+        function updateTheme() {
+            const hour = new Date().getHours();
+            const isDark = hour >= 18 || hour < 6;
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            document.querySelector('meta[name="theme-color"]').content = isDark ? '#0d0d14' : '#faf9f7';
+        }
 
         // ============================================
         // IndexedDB
         // ============================================
-        
         function initDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('YohakuDB', 3);
+                const request = indexedDB.open('YohakuDB', 5);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => { db = request.result; resolve(db); };
                 request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    ['habits', 'goals', 'health', 'notes', 'books', 'images', 'customBooks', 'settings'].forEach(store => {
-                        if (!db.objectStoreNames.contains(store)) {
-                            db.createObjectStore(store, { keyPath: 'id', autoIncrement: store === 'customBooks' });
+                    const database = e.target.result;
+                    ['habits', 'goals', 'health', 'notes', 'books', 'images', 'customBooks', 'settings', 'keywords'].forEach(store => {
+                        if (!database.objectStoreNames.contains(store)) {
+                            database.createObjectStore(store, { keyPath: 'id', autoIncrement: store === 'customBooks' });
                         }
                     });
                 };
@@ -813,88 +840,85 @@
         // ============================================
         // UTILITIES
         // ============================================
-
-        function formatDate(date) {
-            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        }
+        function formatDate(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
         function getDateKey() { return formatDate(currentDate); }
         function getWeekday(date) { return ['日', '月', '火', '水', '木', '金', '土'][date.getDay()]; }
-        function showToast(msg = '保存しました') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
-        }
-
-        function timeToMinutes(timeStr) {
+        function showToast(msg = '保存しました') { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+        
+        function addMinutes(timeStr, minutes) {
             const [h, m] = timeStr.split(':').map(Number);
-            return h * 60 + m;
+            const totalMinutes = h * 60 + m + minutes;
+            const newH = Math.floor(totalMinutes / 60) % 24;
+            const newM = totalMinutes % 60;
+            return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
         }
-
-        function isInTimeRange(start, end) {
+        
+        function timeToMinutes(timeStr) { const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; }
+        
+        function isInTimeRange(start, durationMinutes) {
             const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            const startMinutes = timeToMinutes(start);
-            let endMinutes = timeToMinutes(end);
-            if (endMinutes < startMinutes) endMinutes += 24 * 60; // Handle overnight
-            let checkMinutes = currentMinutes;
-            if (currentMinutes < startMinutes && endMinutes > 24 * 60) checkMinutes += 24 * 60;
-            return checkMinutes >= startMinutes && checkMinutes <= endMinutes;
+            const current = now.getHours() * 60 + now.getMinutes();
+            const startM = timeToMinutes(start);
+            const endM = startM + durationMinutes;
+            return current >= startM && current <= endM;
         }
 
         // ============================================
-        // RENDER
+        // TIME & PERIOD
         // ============================================
-
+        function getTotalDuration(habits) {
+            return habits.reduce((sum, h) => sum + h.duration, 0);
+        }
+        
         function updateDateTime() {
             const now = new Date();
             document.getElementById('currentTime').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
-            const isMorning = isInTimeRange(settings.morningStart, settings.morningEnd);
-            const isEvening = isInTimeRange(settings.eveningStart, settings.eveningEnd);
+            const morningDuration = getTotalDuration(MORNING_HABITS);
+            const eveningDuration = getTotalDuration(EVENING_HABITS);
+            const isMorning = isInTimeRange(settings.morningStart, morningDuration);
+            const isEvening = isInTimeRange(settings.eveningStart, eveningDuration);
             
             const periodEl = document.getElementById('timePeriod');
-            const morningBadge = document.getElementById('morningBadge');
-            const eveningBadge = document.getElementById('eveningBadge');
             const morningSection = document.getElementById('morningSection');
             const eveningSection = document.getElementById('eveningSection');
             
             periodEl.className = 'time-period';
-            morningBadge.classList.remove('active');
-            eveningBadge.classList.remove('active');
             morningSection.classList.remove('highlighted');
-            eveningSection.classList.remove('highlighted', 'highlighted-evening');
+            eveningSection.classList.remove('highlighted', 'evening');
             
             if (isMorning) {
-                periodEl.textContent = '朝のルーティンの時間です';
-                periodEl.classList.add('active-morning');
-                morningBadge.classList.add('active');
+                periodEl.textContent = '🌅 朝のルーティンの時間です';
+                periodEl.classList.add('morning');
                 morningSection.classList.add('highlighted');
             } else if (isEvening) {
-                periodEl.textContent = '夜のルーティンの時間です';
-                periodEl.classList.add('active-evening');
-                eveningBadge.classList.add('active');
-                eveningSection.classList.add('highlighted', 'highlighted-evening');
+                periodEl.textContent = '🌙 夜のルーティンの時間です';
+                periodEl.classList.add('evening');
+                eveningSection.classList.add('highlighted', 'evening');
             } else {
                 const hour = now.getHours();
-                if (hour >= 12 && hour < 17) periodEl.textContent = '午後の活動時間です';
-                else if (hour >= 17 && hour < 21) periodEl.textContent = '夕方の時間です';
-                else periodEl.textContent = '';
+                if (hour >= 5 && hour < 12) periodEl.textContent = '☀️ 午前中です';
+                else if (hour >= 12 && hour < 17) periodEl.textContent = '🌤 午後の時間です';
+                else if (hour >= 17 && hour < 21) periodEl.textContent = '🌆 夕方の時間です';
+                else periodEl.textContent = '🌙 夜の時間です';
             }
+            
+            updateTheme();
         }
 
         function updateTimeRangeDisplay() {
-            document.getElementById('morningTimeRange').textContent = `${settings.morningStart}-${settings.morningEnd}`;
-            document.getElementById('eveningTimeRange').textContent = `${settings.eveningStart}-${settings.eveningEnd}`;
-            document.getElementById('morningTimeBadge').textContent = `${settings.morningStart} - ${settings.morningEnd}`;
-            document.getElementById('eveningTimeBadge').textContent = `${settings.eveningStart} - ${settings.eveningEnd}`;
+            const morningEnd = addMinutes(settings.morningStart, getTotalDuration(MORNING_HABITS));
+            const eveningEnd = addMinutes(settings.eveningStart, getTotalDuration(EVENING_HABITS));
+            document.getElementById('morningTimeBadge').textContent = `${settings.morningStart} - ${morningEnd}`;
+            document.getElementById('eveningTimeBadge').textContent = `${settings.eveningStart} - ${eveningEnd}`;
         }
 
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
         function updateDateDisplay() {
-            const dateText = document.querySelector('#currentDate .date-text');
-            const weekday = document.querySelector('#currentDate .weekday');
-            dateText.textContent = `${currentDate.getMonth() + 1}月${currentDate.getDate()}日`;
-            weekday.textContent = getWeekday(currentDate);
+            document.querySelector('#currentDate .date-text').textContent = `${currentDate.getMonth() + 1}月${currentDate.getDate()}日`;
+            document.querySelector('#currentDate .weekday').textContent = getWeekday(currentDate);
         }
 
         function updateQuote() {
@@ -910,10 +934,11 @@
             document.getElementById('monthQuote').textContent = data.quote;
         }
 
-        async function renderHabits(habits, containerId, period, progressId) {
+        async function renderHabits(habits, containerId, period, progressId, startTime) {
             const container = document.getElementById(containerId);
             const dateKey = getDateKey();
             let completed = 0;
+            let currentTime = startTime;
             container.innerHTML = '';
             
             for (const habit of habits) {
@@ -922,28 +947,25 @@
                 const isCompleted = data?.completed || false;
                 if (isCompleted) completed++;
                 
+                const timeDisplay = currentTime;
+                currentTime = addMinutes(currentTime, habit.duration);
+                
                 const item = document.createElement('div');
                 item.className = `habit-item ${isCompleted ? 'completed' : ''}`;
+                item.onclick = () => toggleHabit(period, habit.id);
                 item.innerHTML = `
-                    <div class="habit-checkbox" onclick="toggleHabit('${period}', '${habit.id}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <div class="habit-info" onclick="toggleHabit('${period}', '${habit.id}')">
+                    <div class="habit-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="habit-info">
                         <div class="habit-name">${habit.name}</div>
-                        <div class="habit-time">${habit.time}</div>
-                    </div>
-                    <button class="habit-timer-btn" onclick="openTimer('${habit.name}', ${habit.duration})">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        ${habit.duration}分
-                    </button>
-                `;
+                        <div class="habit-time">${timeDisplay}〜（${habit.duration}分）</div>
+                    </div>`;
                 container.appendChild(item);
             }
             document.getElementById(progressId).textContent = `${completed}/${habits.length}`;
         }
 
-        async function renderMorningHabits() { await renderHabits(MORNING_HABITS, 'morningHabits', 'morning', 'morningProgress'); }
-        async function renderEveningHabits() { await renderHabits(EVENING_HABITS, 'eveningHabits', 'evening', 'eveningProgress'); }
+        async function renderMorningHabits() { await renderHabits(MORNING_HABITS, 'morningHabits', 'morning', 'morningProgress', settings.morningStart); }
+        async function renderEveningHabits() { await renderHabits(EVENING_HABITS, 'eveningHabits', 'evening', 'eveningProgress', settings.eveningStart); }
 
         async function renderHealthGrid() {
             const container = document.getElementById('healthGrid');
@@ -954,14 +976,7 @@
                 const value = data?.value || item.default;
                 const div = document.createElement('div');
                 div.className = 'health-item';
-                div.innerHTML = `
-                    <div class="health-icon">${item.icon}</div>
-                    <div class="health-label">${item.label}</div>
-                    <div class="health-value">
-                        <input type="number" step="0.1" value="${value}" onchange="updateHealth('${item.id}', this.value)" onclick="this.select()">
-                        <span class="health-unit">${item.unit}</span>
-                    </div>
-                `;
+                div.innerHTML = `<div class="health-icon">${item.icon}</div><div class="health-label">${item.label}</div><div class="health-value"><input type="number" step="0.1" value="${value}" onchange="updateHealth('${item.id}', this.value)" onclick="this.select()"><span class="health-unit">${item.unit}</span></div>`;
                 container.appendChild(div);
             }
         }
@@ -975,41 +990,95 @@
             const container = document.getElementById('uploadedImages');
             const data = await dbGet('images', getDateKey());
             const images = data?.images || [];
-            container.innerHTML = images.map((img, i) => `
-                <div class="uploaded-image">
-                    <img src="${img}" alt="Journal image">
-                    <button class="remove-btn" onclick="removeImage(${i})">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            `).join('');
+            container.innerHTML = images.map((img, i) => `<div class="uploaded-image"><img src="${img}" alt=""><button class="remove-btn" onclick="removeImage(${i})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>`).join('');
         }
 
+        // ============================================
+        // NEWS FUNCTIONS
+        // ============================================
+        async function loadKeywords() {
+            const data = await dbGet('keywords', 'userKeywords');
+            if (data?.keywords?.length) newsKeywords = data.keywords;
+            else newsKeywords = [...DEFAULT_KEYWORDS];
+        }
+
+        async function saveKeywords() {
+            await dbPut('keywords', { id: 'userKeywords', keywords: newsKeywords });
+        }
+
+        function renderKeywordTags() {
+            const container = document.getElementById('keywordTags');
+            container.innerHTML = newsKeywords.map((kw, i) => `<div class="keyword-tag"><span>${kw}</span><span class="remove" onclick="event.stopPropagation(); removeKeyword(${i})">×</span></div>`).join('') + '<button class="add-keyword-btn" onclick="openAddKeywordModal()">+ 追加</button>';
+        }
+
+        function renderNews() {
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = newsKeywords.map(kw => {
+                const searchUrl = `https://news.google.com/search?q=${encodeURIComponent(kw)}&hl=ja&gl=JP&ceid=JP:ja`;
+                return `
+                    <div class="news-card">
+                        <div class="news-card-header">
+                            <span class="news-keyword">${kw}</span>
+                            <a href="${searchUrl}" target="_blank" class="news-link-btn">Google Newsで開く →</a>
+                        </div>
+                        <div class="news-list">
+                            <div class="news-item" onclick="window.open('${searchUrl}', '_blank')">
+                                <div class="news-item-title">「${kw}」の最新ニュースを見る</div>
+                                <div class="news-item-meta">
+                                    <span class="news-item-source">Google News</span>
+                                    <span class="news-item-date">タップして開く</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function openAddKeywordModal() { document.getElementById('addKeywordModal').classList.add('active'); document.getElementById('keywordInput').value = ''; }
+        function closeAddKeywordModal() { document.getElementById('addKeywordModal').classList.remove('active'); }
+
+        async function addKeyword() {
+            const input = document.getElementById('keywordInput').value.trim();
+            if (!input) return;
+            if (!newsKeywords.includes(input)) {
+                newsKeywords.push(input);
+                await saveKeywords();
+                renderKeywordTags();
+                renderNews();
+            }
+            closeAddKeywordModal();
+            showToast('キーワードを追加しました');
+        }
+
+        async function removeKeyword(index) {
+            newsKeywords.splice(index, 1);
+            await saveKeywords();
+            renderKeywordTags();
+            renderNews();
+            showToast('キーワードを削除しました');
+        }
+
+        // ============================================
+        // WEEK VIEW
+        // ============================================
         async function renderWeekCalendar() {
             const container = document.getElementById('weekCalendar');
             container.innerHTML = '';
             const startOfWeek = new Date(currentDate);
             startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-            
             for (let i = 0; i < 7; i++) {
                 const date = new Date(startOfWeek);
                 date.setDate(startOfWeek.getDate() + i);
                 const dateKey = formatDate(date);
                 const isActive = dateKey === formatDate(currentDate);
-                
                 let completed = 0;
                 const total = MORNING_HABITS.length + EVENING_HABITS.length;
                 for (const h of MORNING_HABITS) { if ((await dbGet('habits', `${dateKey}-morning-${h.id}`))?.completed) completed++; }
                 for (const h of EVENING_HABITS) { if ((await dbGet('habits', `${dateKey}-evening-${h.id}`))?.completed) completed++; }
-                
                 const div = document.createElement('div');
                 div.className = `week-day ${isActive ? 'active' : ''}`;
                 div.onclick = () => { currentDate = new Date(date); renderAll(); };
-                div.innerHTML = `
-                    <div class="week-day-name">${getWeekday(date)}</div>
-                    <div class="week-day-num">${date.getDate()}</div>
-                    <div class="week-day-progress"><div class="week-day-progress-bar" style="width: ${total > 0 ? (completed / total) * 100 : 0}%"></div></div>
-                `;
+                div.innerHTML = `<div class="week-day-name">${getWeekday(date)}</div><div class="week-day-num">${date.getDate()}</div><div class="week-day-progress"><div class="week-day-progress-bar" style="width: ${total > 0 ? (completed / total) * 100 : 0}%"></div></div>`;
                 container.appendChild(div);
             }
         }
@@ -1017,15 +1086,13 @@
         function renderWeeklyActivities() {
             const container = document.getElementById('weeklyActivities');
             const today = getWeekday(currentDate);
-            container.innerHTML = WEEKLY_ACTIVITIES.map(a => `
-                <div class="activity-item">
-                    <div class="activity-info">
-                        <span class="activity-icon">${a.icon}</span>
-                        <div><div class="activity-name">${a.name}</div><div class="activity-day">${a.day}</div></div>
-                    </div>
-                    <span class="activity-status ${a.day.includes(today) ? 'scheduled' : ''}">${a.day.includes(today) ? '今日' : '予定'}</span>
-                </div>
-            `).join('');
+            const isWeekend = today === '土' || today === '日';
+            container.innerHTML = WEEKLY_ACTIVITIES.map(a => {
+                let isToday = a.day.includes(today);
+                if (a.id === 'film' && isWeekend) isToday = true;
+                if (a.id === 'art' && isWeekend) isToday = true;
+                return `<div class="activity-item"><div class="activity-info"><span class="activity-icon">${a.icon}</span><div><div class="activity-name">${a.name}</div><div class="activity-day">${a.day}</div></div></div><span class="activity-status ${isToday ? 'scheduled' : ''}">${isToday ? '今日' : '予定'}</span></div>`;
+            }).join('');
         }
 
         async function renderBookList() {
@@ -1034,7 +1101,6 @@
             const books = MONTHLY_BOOKS[month] || [];
             container.innerHTML = '';
             let completed = 0;
-            
             for (const book of books) {
                 const key = `book-${month}-${book.title}`;
                 const data = await dbGet('books', key);
@@ -1043,28 +1109,24 @@
                 const div = document.createElement('div');
                 div.className = `book-item ${isCompleted ? 'completed' : ''}`;
                 div.onclick = () => toggleBook(month, book.title);
-                div.innerHTML = `
-                    <div class="book-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-                    <div class="book-info"><div class="book-title">${book.title}</div><div class="book-author">${book.author}</div></div>
-                `;
+                div.innerHTML = `<div class="book-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="book-info"><div class="book-title">${book.title}</div><div class="book-author">${book.author}</div></div>`;
                 container.appendChild(div);
             }
-            
             const customBooks = (await dbGetAll('customBooks')).filter(b => b.month === month);
             for (const book of customBooks) {
                 if (book.completed) completed++;
                 const div = document.createElement('div');
                 div.className = `book-item ${book.completed ? 'completed' : ''}`;
                 div.onclick = () => toggleCustomBook(book.id);
-                div.innerHTML = `
-                    <div class="book-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-                    <div class="book-info"><div class="book-title">${book.title}</div><div class="book-author">${book.author}</div></div>
-                `;
+                div.innerHTML = `<div class="book-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div class="book-info"><div class="book-title">${book.title}</div><div class="book-author">${book.author}</div></div>`;
                 container.appendChild(div);
             }
             document.getElementById('bookProgress').textContent = `${completed}/${books.length + customBooks.length}`;
         }
 
+        // ============================================
+        // GOALS
+        // ============================================
         async function renderYearGoals() {
             const container = document.getElementById('yearGoals');
             container.innerHTML = '';
@@ -1108,22 +1170,74 @@
             }
         }
 
+        // ============================================
+        // FIVE YEAR PLAN
+        // ============================================
+        function renderPlanTabs() {
+            const container = document.getElementById('planTabs');
+            container.innerHTML = [2026, 2027, 2028, 2029, 2030].map(year => 
+                `<button class="plan-tab ${year === selectedPlanYear ? 'active' : ''}" onclick="selectPlanYear(${year})">${year}</button>`
+            ).join('');
+        }
+
+        function selectPlanYear(year) {
+            selectedPlanYear = year;
+            renderPlanTabs();
+            renderFiveYearPlan();
+        }
+
         function renderFiveYearPlan() {
             const container = document.getElementById('fiveYearPlan');
-            container.innerHTML = FIVE_YEAR_PLAN.map(y => `
-                <div class="plan-year-card" style="${y.year === 2026 ? 'background: linear-gradient(145deg, var(--accent-gold-dim) 0%, var(--bg-card) 40%);' : ''}">
+            const y = FIVE_YEAR_PLAN[selectedPlanYear];
+            const isCurrent = selectedPlanYear === 2026;
+            
+            container.innerHTML = `
+                <div class="plan-year-card ${isCurrent ? 'current' : ''}">
                     <div class="plan-year-header">
-                        <div><div class="plan-year">${y.year}</div><div class="plan-year-theme">${y.theme}</div></div>
-                        <div class="plan-year-revenue"><div class="plan-year-revenue-label">年収目標</div><div class="plan-year-revenue-value">¥${y.revenue}</div></div>
+                        <div>
+                            <div class="plan-year">${selectedPlanYear}</div>
+                            <div class="plan-year-theme">${y.theme}</div>
+                        </div>
+                        <div class="plan-year-revenue">
+                            <div class="plan-year-revenue-label">年収目標</div>
+                            <div class="plan-year-revenue-value">¥${y.revenue}</div>
+                        </div>
                     </div>
                     <div class="plan-breakdown">
                         <div class="plan-breakdown-item"><div class="plan-breakdown-label">PxDT</div><div class="plan-breakdown-value">¥${y.breakdown.pxdt}</div></div>
                         <div class="plan-breakdown-item"><div class="plan-breakdown-label">HB</div><div class="plan-breakdown-value">¥${y.breakdown.hb}</div></div>
                         <div class="plan-breakdown-item"><div class="plan-breakdown-label">yohaku</div><div class="plan-breakdown-value">¥${y.breakdown.yohaku}</div></div>
                     </div>
-                    <div class="plan-milestones">${y.milestones.map(m => `<div class="plan-milestone"><div class="plan-milestone-dot"></div><div class="plan-milestone-text">${m}</div></div>`).join('')}</div>
+                    <div style="text-align: center; padding: 12px; background: var(--accent-gold-dim); border-radius: var(--radius-md); margin-bottom: 16px;">
+                        <div style="font-size: 11px; color: var(--text-muted);">yohaku月商平均</div>
+                        <div style="font-family: var(--font-display); font-size: 28px; color: var(--accent-gold);">¥${y.yohakuMonthly}</div>
+                    </div>
                 </div>
-            `).join('');
+                
+                <div class="section-title" style="margin: 20px 0 12px;">四半期マイルストーン</div>
+                ${y.quarters.map(q => `
+                    <div class="plan-quarter">
+                        <div class="plan-quarter-header">
+                            <span class="plan-quarter-name">${q.q}（${q.period}）</span>
+                            <span class="plan-quarter-revenue">¥${q.revenue}</span>
+                        </div>
+                        <div class="plan-quarter-events">${q.events}</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">累計: ¥${q.cumulative}</div>
+                    </div>
+                `).join('')}
+                
+                <div class="section-title" style="margin: 20px 0 12px;">SMART目標</div>
+                <div class="plan-year-card">
+                    ${Object.entries(y.smartGoals).map(([category, goals]) => `
+                        <div class="plan-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                            <div class="plan-section-title">${{business: '💼 事業・キャリア', skill: '📚 スキル・学習', artist: '🎨 アーティスト活動', life: '🌱 生活'}[category]}</div>
+                            <div class="plan-milestones">
+                                ${goals.map(g => `<div class="plan-milestone"><div class="plan-milestone-dot"></div><div class="plan-milestone-text">${g}</div></div>`).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         async function renderStats() {
@@ -1141,14 +1255,12 @@
             document.getElementById('totalStreak').textContent = streak;
             document.getElementById('totalHabits').textContent = (await dbGetAll('habits')).filter(h => h.completed).length;
             document.getElementById('totalGoals').textContent = (await dbGetAll('goals')).filter(g => g.completed).length;
-            const completedBooks = (await dbGetAll('books')).filter(b => b.completed).length + (await dbGetAll('customBooks')).filter(b => b.completed).length;
-            document.getElementById('totalBooks').textContent = completedBooks;
+            document.getElementById('totalBooks').textContent = (await dbGetAll('books')).filter(b => b.completed).length + (await dbGetAll('customBooks')).filter(b => b.completed).length;
         }
 
         // ============================================
         // EVENT HANDLERS
         // ============================================
-
         async function toggleHabit(period, habitId) {
             const key = `${getDateKey()}-${period}-${habitId}`;
             const data = await dbGet('habits', key);
@@ -1198,7 +1310,6 @@
         function closeCalendar() { document.getElementById('calendarModal').classList.remove('active'); }
         function prevMonth() { calendarViewDate.setMonth(calendarViewDate.getMonth() - 1); renderCalendar(); }
         function nextMonth() { calendarViewDate.setMonth(calendarViewDate.getMonth() + 1); renderCalendar(); }
-        
         function renderCalendar() {
             document.getElementById('calendarMonth').textContent = `${calendarViewDate.getFullYear()}年 ${calendarViewDate.getMonth() + 1}月`;
             const container = document.getElementById('calendarDays');
@@ -1208,7 +1319,6 @@
             const totalDays = lastDay.getDate();
             const today = new Date();
             const prevMonthLastDay = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), 0).getDate();
-            
             let html = '';
             for (let i = startDay - 1; i >= 0; i--) html += `<button class="calendar-day other-month">${prevMonthLastDay - i}</button>`;
             for (let i = 1; i <= totalDays; i++) {
@@ -1221,30 +1331,23 @@
             for (let i = 1; i <= remaining; i++) html += `<button class="calendar-day other-month">${i}</button>`;
             container.innerHTML = html;
         }
-        
-        function selectDate(day) {
-            currentDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), day);
-            closeCalendar();
-            renderAll();
-        }
+        function selectDate(day) { currentDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), day); closeCalendar(); renderAll(); }
 
         // Settings
         function openSettings() {
             document.getElementById('morningStart').value = settings.morningStart;
-            document.getElementById('morningEnd').value = settings.morningEnd;
             document.getElementById('eveningStart').value = settings.eveningStart;
-            document.getElementById('eveningEnd').value = settings.eveningEnd;
             document.getElementById('settingsModal').classList.add('active');
         }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
         async function saveSettings() {
             settings.morningStart = document.getElementById('morningStart').value;
-            settings.morningEnd = document.getElementById('morningEnd').value;
             settings.eveningStart = document.getElementById('eveningStart').value;
-            settings.eveningEnd = document.getElementById('eveningEnd').value;
             await dbPut('settings', { id: 'routineTimes', ...settings });
             updateTimeRangeDisplay();
             updateDateTime();
+            await renderMorningHabits();
+            await renderEveningHabits();
             closeSettings();
             showToast('設定を保存しました');
         }
@@ -1252,58 +1355,9 @@
             const data = await dbGet('settings', 'routineTimes');
             if (data) {
                 settings.morningStart = data.morningStart || '06:00';
-                settings.morningEnd = data.morningEnd || '09:00';
                 settings.eveningStart = data.eveningStart || '21:00';
-                settings.eveningEnd = data.eveningEnd || '23:59';
             }
             updateTimeRangeDisplay();
-        }
-
-        // Timer
-        function openTimer(name, duration) {
-            currentTimerHabit = name;
-            timerTotal = duration * 60;
-            timerRemaining = timerTotal;
-            document.getElementById('timerTitle').textContent = name;
-            updateTimerDisplay();
-            document.getElementById('timerModal').classList.add('active');
-        }
-        function closeTimer() { 
-            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-            document.getElementById('timerModal').classList.remove('active'); 
-        }
-        function updateTimerDisplay() {
-            const mins = Math.floor(timerRemaining / 60);
-            const secs = timerRemaining % 60;
-            document.getElementById('timerValue').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            document.getElementById('timerProgressBar').style.width = `${(timerRemaining / timerTotal) * 100}%`;
-        }
-        function toggleTimer() {
-            const btn = document.getElementById('timerStartBtn');
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                btn.textContent = '再開';
-            } else {
-                btn.textContent = '一時停止';
-                timerInterval = setInterval(() => {
-                    timerRemaining--;
-                    updateTimerDisplay();
-                    if (timerRemaining <= 0) {
-                        clearInterval(timerInterval);
-                        timerInterval = null;
-                        btn.textContent = '完了！';
-                        if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
-                        showToast(`${currentTimerHabit} 完了！`);
-                    }
-                }, 1000);
-            }
-        }
-        function resetTimer() {
-            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-            timerRemaining = timerTotal;
-            updateTimerDisplay();
-            document.getElementById('timerStartBtn').textContent = '開始';
         }
 
         // Add Book
@@ -1349,6 +1403,8 @@
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                 btn.classList.add('active');
                 document.getElementById(btn.dataset.view).classList.add('active');
+                if (btn.dataset.view === 'newsView') { renderKeywordTags(); renderNews(); }
+                if (btn.dataset.view === 'planView') { renderPlanTabs(); renderFiveYearPlan(); }
             });
         });
         document.getElementById('prevDay').addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); renderAll(); });
@@ -1357,7 +1413,6 @@
         // ============================================
         // INIT
         // ============================================
-
         async function renderAll() {
             updateDateDisplay();
             updateQuote();
@@ -1373,16 +1428,20 @@
             await renderYearGoals();
             renderMonthTabs();
             await renderMonthGoals();
+            renderPlanTabs();
             renderFiveYearPlan();
             await renderStats();
         }
 
         async function init() {
             try {
+                updateTheme();
                 await initDB();
                 await loadSettings();
+                await loadKeywords();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
+                setInterval(updateTheme, 60000);
                 selectedGoalMonth = currentDate.getMonth() + 1;
                 await renderAll();
             } catch (error) { console.error('Init error:', error); }
