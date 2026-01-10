@@ -704,10 +704,10 @@
             
             <!-- News View -->
             <div class="view" id="newsView">
-                <!-- 余白日報 -->
+                <!-- 余白新聞 -->
                 <div class="daily-paper" id="dailyPaper" style="display: none;">
                     <div class="paper-header">
-                        <div class="paper-title">余白日報</div>
+                        <div class="paper-title">余白新聞</div>
                         <div class="paper-date" id="paperDate"></div>
                         <div class="paper-subtitle">— 質量と余白の間で、今日を知る —</div>
                     </div>
@@ -717,30 +717,30 @@
                     </div>
                 </div>
                 
-                <!-- 日報生成・表示エリア -->
+                <!-- 余白新聞生成・表示エリア -->
                 <div class="section">
                     <div class="daily-paper-card" id="dailyPaperCard">
                         <div class="paper-card-header">
                             <span class="paper-card-icon">📰</span>
                             <div>
-                                <div class="paper-card-title" id="paperCardTitle">今日の余白日報</div>
+                                <div class="paper-card-title" id="paperCardTitle">今日の余白新聞</div>
                                 <div class="paper-card-desc" id="paperStatus">AIがニュースを要約します</div>
                             </div>
                         </div>
                         <div id="paperActionArea">
                             <button class="paper-generate-btn" id="generatePaperBtn" onclick="generateDailyPaper()">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                                日報を生成
+                                余白新聞を生成
                             </button>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 過去の日報アーカイブ -->
+                <!-- 過去の余白新聞アーカイブ -->
                 <div class="section">
-                    <div class="section-header"><span class="section-title">📚 日報アーカイブ</span></div>
+                    <div class="section-header"><span class="section-title">📚 余白新聞アーカイブ</span></div>
                     <div class="paper-archive-list" id="paperArchiveList">
-                        <div class="paper-archive-empty">まだ日報がありません</div>
+                        <div class="paper-archive-empty">まだ余白新聞がありません</div>
                     </div>
                 </div>
                 
@@ -818,11 +818,11 @@
         <button class="btn-primary" onclick="saveSettings()">保存する</button>
         
         <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
-            <div class="settings-section-title">📰 余白日報（AI設定）</div>
+            <div class="settings-section-title">📰 余白新聞（AI設定）</div>
             
             <div class="settings-item">
                 <div class="settings-item-label">OpenAI APIキー <span style="color: var(--accent-rose);">必須</span></div>
-                <div class="settings-item-desc">日報のAI生成に使用します（GPT-4o）</div>
+                <div class="settings-item-desc">余白新聞のAI生成に使用します（GPT-4o）</div>
                 <input type="password" class="form-input" id="openaiApiKey" placeholder="sk-..." style="margin-top: 8px;">
                 <button class="btn-primary" style="margin-top: 12px; background: var(--accent-sage);" onclick="saveOpenAIKey()">OpenAI APIキーを保存</button>
             </div>
@@ -839,7 +839,7 @@
             
             <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 12px; color: var(--text-muted);">
                 💡 <strong>APIキーについて</strong><br>
-                • OpenAI: 必須（日報生成に使用）<br>
+                • OpenAI: 必須（余白新聞生成に使用）<br>
                 • NewsData.io: 推奨（高品質なニュース取得）<br>
                 • APIキーがなくてもGoogle News RSSで取得を試みます
             </div>
@@ -879,7 +879,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.2.2';
+        const APP_VERSION = 'v3.3.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1089,7 +1089,7 @@
             { id: 'water', label: '水分', icon: '💧', unit: 'L', default: '2.0' }
         ];
 
-        const DEFAULT_KEYWORDS = ['AI', '難聴', 'ヘラルボニー', 'アート', 'ピクシーダストテクノロジーズ', '認知症'];
+        const DEFAULT_KEYWORDS = ['AI', '難聴', 'ヘラルボニー', 'アート', 'ピクシーダストテクノロジーズ', '認知症', 'HYDE', '難病', '紛争', 'ガザ地区', '政権', 'イスラエル', '戦争'];
 
         // ============================================
         // STATE
@@ -1873,7 +1873,7 @@
         }
         
         // ==========================================
-        // 余白日報 - 実際のニュースに基づく日報生成
+        // 余白新聞 - 実際のニュースに基づく余白新聞生成
         // ==========================================
         
         async function generateDailyPaper(forceRegenerate = false) {
@@ -1884,7 +1884,7 @@
             const targetDateObj = new Date(currentDate);
             const dateStr = `${targetDateObj.getFullYear()}年${targetDateObj.getMonth() + 1}月${targetDateObj.getDate()}日`;
             
-            console.log(`=== 日報生成開始: ${targetDate} ===`);
+            console.log(`=== 余白新聞生成開始: ${targetDate} ===`);
             
             // OpenAI APIキーの確認（必須）
             const openaiKeyData = await dbGet('settings', 'openaiApiKey');
@@ -1928,8 +1928,8 @@
                 console.log(`取得したニュース: ${newsArticles.length}件`);
                 statusEl.textContent = `${newsArticles.length}件のニュースを取得。AI分析中...`;
                 
-                // Step 2: GPT-4oで日報を生成
-                console.log('Step 2: GPT-4oで日報生成');
+                // Step 2: GPT-4oで余白新聞を生成
+                console.log('Step 2: GPT-4oで余白新聞生成');
                 actionArea.innerHTML = `
                     <div class="paper-generate-btn loading" style="cursor: default;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -1944,14 +1944,14 @@
                 
                 // 表示
                 showDailyPaper(paperContent, targetDate);
-                statusEl.textContent = '日報が生成されました';
+                statusEl.textContent = '余白新聞が生成されました';
                 
                 // UI更新
                 await updatePaperCardForDate();
                 await renderPaperArchive();
                 
             } catch (error) {
-                console.error('日報生成エラー:', error);
+                console.error('余白新聞生成エラー:', error);
                 showToast('エラー: ' + error.message);
                 statusEl.textContent = 'エラー: ' + error.message;
                 await updatePaperCardForDate();
@@ -2199,7 +2199,7 @@
         }
         
         // ==========================================
-        // GPT-4o で高品質な日報を生成
+        // GPT-4o で高品質な余白新聞を生成
         // ==========================================
         async function generatePaperFromNews(apiKey, newsArticles, dateStr) {
             // ニュースをカテゴリ別に整理
@@ -2235,10 +2235,10 @@
             const totalNewsCount = newsArticles.length;
             
             // 徹底的に改善したプロンプト
-            const prompt = `# 🗞️ 余白日報 編集指示書
+            const prompt = `# 🗞️ 余白新聞 編集指示書
 
-あなたは「余白日報」という個人向けプレミアム・デイリーレポートの編集長です。
-**実際のニュース記事**を分析し、読者専用の価値ある日報を作成してください。
+あなたは「余白新聞」という個人向けプレミアム・デイリーレポートの編集長です。
+**実際のニュース記事**を分析し、読者専用の価値ある余白新聞を作成してください。
 
 ## 📅 発行日
 ${dateStr}
@@ -2362,8 +2362,8 @@ ${newsText}
                     messages: [
                         {
                             role: 'system',
-                            content: `あなたは「余白日報」の編集長です。
-実際のニュース記事を分析し、読者に価値ある洞察を提供する高品質な日報を作成します。
+                            content: `あなたは「余白新聞」の編集長です。
+実際のニュース記事を分析し、読者に価値ある洞察を提供する高品質な余白新聞を作成します。
 
 重要なルール:
 1. 提供されたニュース記事の内容のみを使用する
@@ -2425,7 +2425,7 @@ ${newsText}
             }
         }
         
-        // 日報を表示（プレミアム版）
+        // 余白新聞を表示（プレミアム版）
         function showDailyPaper(content, date) {
             const paper = document.getElementById('dailyPaper');
             const paperDate = document.getElementById('paperDate');
@@ -2439,12 +2439,9 @@ ${newsText}
             let html = `
                 <div class="paper-section">
                     <div class="paper-headline" style="font-size: 24px; text-align: center; margin-bottom: 20px; color: #8b5a2b; font-family: var(--font-serif); letter-spacing: 0.05em;">
-                        「${content.headline || '本日の日報'}」
+                        「${content.headline || '本日の余白新聞'}」
                     </div>
-                    <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">
-                        ${content.news_count ? `📰 ${content.news_count}件のニュースを分析` : ''}
-                        ${content.sources?.length ? ` | 出典: ${content.sources.slice(0, 5).join(', ')}${content.sources.length > 5 ? ' 他' : ''}` : ''}
-                    </div>
+                    ${content.news_count ? `<div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">📰 ${content.news_count}件のニュースを分析</div>` : ''}
                     <div class="paper-summary" style="background: rgba(139,90,43,0.08); padding: 20px; border-radius: 10px; border-left: 4px solid #8b5a2b;">
                         <div style="font-size: 11px; color: #8b5a2b; margin-bottom: 10px; font-weight: 600; letter-spacing: 0.1em;">📋 EXECUTIVE SUMMARY</div>
                         <div style="font-size: 14px; line-height: 1.9; white-space: pre-line;">${content.summary || ''}</div>
@@ -2521,7 +2518,7 @@ ${newsText}
                         ✨ ${content.closing || '今日も良い一日を。'}
                     </div>
                     <div style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed rgba(139,90,43,0.3); font-size: 11px; color: var(--text-muted);">
-                        余白日報 — 質量と余白の間で、今日を知る<br>
+                        余白新聞 — 質量と余白の間で、今日を知る<br>
                         <span style="font-size: 10px; opacity: 0.7;">${content.generated_date || ''}</span>
                     </div>
                 </div>
@@ -2529,6 +2526,7 @@ ${newsText}
             
             paperContent.innerHTML = html;
             paper.style.display = 'block';
+            paper.scrollTop = 0; // 一番上から表示
             document.body.style.overflow = 'hidden';
         }
         
@@ -2538,7 +2536,7 @@ ${newsText}
             renderPaperArchive(); // アーカイブを更新
         }
         
-        // 日報アーカイブ表示
+        // 余白新聞アーカイブ表示
         async function renderPaperArchive() {
             const container = document.getElementById('paperArchiveList');
             const allNotes = await dbGetAll('notes');
@@ -2550,7 +2548,7 @@ ${newsText}
                 .slice(0, 10); // 最新10件
             
             if (papers.length === 0) {
-                container.innerHTML = '<div class="paper-archive-empty">まだ日報がありません</div>';
+                container.innerHTML = '<div class="paper-archive-empty">まだ余白新聞がありません</div>';
                 return;
             }
             
@@ -2559,7 +2557,7 @@ ${newsText}
             container.innerHTML = papers.map(p => {
                 const dateObj = new Date(p.date);
                 const weekday = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
-                const headline = p.content.headline || '日報';
+                const headline = p.content.headline || '余白新聞';
                 const isToday = p.date === formatDate(new Date());
                 const isSelected = p.date === selectedDate;
                 
@@ -2575,7 +2573,7 @@ ${newsText}
             }).join('');
         }
         
-        // 選択された日付の日報状態を更新
+        // 選択された日付の余白新聞状態を更新
         async function updatePaperCardForDate() {
             const dateKey = getDateKey();
             const today = formatDate(new Date());
@@ -2590,17 +2588,17 @@ ${newsText}
             const weekday = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
             const dateStr = `${dateObj.getMonth() + 1}/${dateObj.getDate()}（${weekday}）`;
             
-            // その日の日報があるか確認
+            // その日の余白新聞があるか確認
             const cachedPaper = await dbGet('notes', `paper-${dateKey}`);
             
             if (cachedPaper?.content) {
-                // 日報がある場合
-                titleEl.textContent = `${dateStr} の余白日報`;
-                statusEl.textContent = `「${cachedPaper.content.headline || '日報'}」`;
+                // 余白新聞がある場合
+                titleEl.textContent = `${dateStr} の余白新聞`;
+                statusEl.textContent = `「${cachedPaper.content.headline || '余白新聞'}」`;
                 actionArea.innerHTML = `
                     <button class="paper-generate-btn" onclick="showDailyPaper(window._cachedPaperContent, '${dateKey}')" style="background: linear-gradient(135deg, var(--accent-sage) 0%, #4a7050 100%);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        日報を読む
+                        余白新聞を読む
                     </button>
                     <button class="paper-generate-btn" onclick="regenerateDailyPaper()" style="margin-top: 8px; background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -2611,21 +2609,21 @@ ${newsText}
                 window._cachedPaperContent = cachedPaper.content;
             } else if (isFuture) {
                 // 未来の日付
-                titleEl.textContent = `${dateStr} の余白日報`;
-                statusEl.textContent = '未来の日報は生成できません';
+                titleEl.textContent = `${dateStr} の余白新聞`;
+                statusEl.textContent = '未来の余白新聞は生成できません';
                 actionArea.innerHTML = `
                     <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 13px;">
                         🔮 この日はまだ来ていません
                     </div>
                 `;
             } else {
-                // 日報がない場合（今日または過去）
-                titleEl.textContent = isToday ? '今日の余白日報' : `${dateStr} の余白日報`;
-                statusEl.textContent = isToday ? 'AIが今日のニュースを要約します' : 'この日の日報を遡って生成できます';
+                // 余白新聞がない場合（今日または過去）
+                titleEl.textContent = isToday ? '今日の余白新聞' : `${dateStr} の余白新聞`;
+                statusEl.textContent = isToday ? 'AIが今日のニュースを要約します' : 'この日の余白新聞を遡って生成できます';
                 actionArea.innerHTML = `
                     <button class="paper-generate-btn" onclick="generateDailyPaper()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                        ${isToday ? '日報を生成' : 'この日の日報を生成'}
+                        ${isToday ? '余白新聞を生成' : 'この日の余白新聞を生成'}
                     </button>
                 `;
             }
@@ -2740,8 +2738,8 @@ ${newsText}
             renderPlanTabs();
             renderFiveYearPlan();
             await renderStats();
-            await updatePaperCardForDate(); // 日報カード更新
-            await renderPaperArchive(); // 日報アーカイブ更新
+            await updatePaperCardForDate(); // 余白新聞カード更新
+            await renderPaperArchive(); // 余白新聞アーカイブ更新
         }
 
         async function init() {
