@@ -879,7 +879,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.2.1';
+        const APP_VERSION = 'v3.2.2';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -2327,7 +2327,8 @@ ${newsText}
       "analysis": "背景・文脈（200文字）",
       "insight": "読者への示唆（200文字）",
       "source": "記事の出典メディア名",
-      "source_url": "引用した記事のURL（必須・提供されたURLをそのまま使用）"
+      "source_title": "引用した元記事のタイトル（そのままコピー）",
+      "source_url": "引用した記事のURL（提供されたURLをそのまま使用）"
     }
   ],
   "question_of_day": "今日の問い（60-100文字）",
@@ -2457,6 +2458,7 @@ ${newsText}
                 const analysis = section.analysis || section.content || '';
                 const insight = section.insight || '';
                 const source = section.source || '';
+                const sourceTitle = section.source_title || '';
                 const sourceUrl = section.source_url || '';
                 
                 html += `
@@ -2480,24 +2482,21 @@ ${newsText}
                         ` : ''}
                         
                         ${insight ? `
-                            <div style="background: rgba(107,143,113,0.1); padding: 14px; border-radius: 8px; border-left: 3px solid var(--accent-sage);">
+                            <div style="background: rgba(107,143,113,0.1); padding: 14px; border-radius: 8px; border-left: 3px solid var(--accent-sage); margin-bottom: 12px;">
                                 <div style="font-size: 10px; color: var(--accent-sage); margin-bottom: 6px; font-weight: 600;">💡 INSIGHT FOR YOU</div>
                                 <div style="font-size: 13px; line-height: 1.8; font-style: italic;">${insight}</div>
                             </div>
                         ` : ''}
                         
-                        <!-- 引用元リンク -->
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-subtle);">
-                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                <span style="font-size: 10px; color: var(--text-muted);">📎 出典:</span>
-                                ${source ? `<span style="font-size: 11px; color: var(--text-secondary);">${source}</span>` : ''}
-                            </div>
+                        <!-- 引用元 -->
+                        <div style="padding: 10px 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 12px;">
+                            <div style="color: var(--text-muted); margin-bottom: 4px;">📎 出典${source ? `: ${source}` : ''}</div>
                             ${sourceUrl ? `
                                 <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" 
-                                   style="display: block; margin-top: 8px; font-size: 11px; color: var(--accent-blue); text-decoration: none; padding: 8px 12px; background: var(--accent-blue-dim); border-radius: 6px; text-align: center;">
-                                    🔗 元記事を確認
+                                   style="color: var(--accent-blue); text-decoration: none; line-height: 1.5; display: block;">
+                                    ${sourceTitle || '元記事を確認 →'}
                                 </a>
-                            ` : ''}
+                            ` : (sourceTitle ? `<span style="color: var(--text-secondary);">${sourceTitle}</span>` : '')}
                         </div>
                     </div>
                 `;
