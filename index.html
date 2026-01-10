@@ -808,11 +808,28 @@
         
         <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
             <div class="settings-section-title">📰 余白日報（AI設定）</div>
+            
             <div class="settings-item">
-                <div class="settings-item-label">OpenAI APIキー</div>
-                <div class="settings-item-desc">ニュースの要約生成に使用します（キーは端末内に保存）</div>
+                <div class="settings-item-label">OpenAI APIキー <span style="color: var(--accent-rose);">必須</span></div>
+                <div class="settings-item-desc">日報のAI生成に使用します（GPT-4o）</div>
                 <input type="password" class="form-input" id="openaiApiKey" placeholder="sk-..." style="margin-top: 8px;">
-                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-sage);" onclick="saveApiKey()">APIキーを保存</button>
+                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-sage);" onclick="saveOpenAIKey()">OpenAI APIキーを保存</button>
+            </div>
+            
+            <div class="settings-item" style="margin-top: 20px;">
+                <div class="settings-item-label">GNews APIキー <span style="color: var(--accent-rose);">必須</span></div>
+                <div class="settings-item-desc">
+                    実際のニュース取得に使用します（無料: 100件/日）<br>
+                    <a href="https://gnews.io/" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">GNews.io で無料登録 →</a>
+                </div>
+                <input type="password" class="form-input" id="gnewsApiKey" placeholder="API Key..." style="margin-top: 8px;">
+                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-blue);" onclick="saveGNewsKey()">GNews APIキーを保存</button>
+            </div>
+            
+            <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 12px; color: var(--text-muted);">
+                💡 <strong>両方のAPIキーが必要です</strong><br>
+                GNews: 実際のニュースを取得<br>
+                OpenAI: ニュースを要約・分析してAI日報を生成
             </div>
         </div>
         
@@ -850,7 +867,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v2.1.0';
+        const APP_VERSION = 'v3.0.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1782,7 +1799,7 @@
             document.getElementById('eveningStart').value = settings.eveningStart;
             document.getElementById('appVersion').textContent = APP_VERSION;
             document.getElementById('appLastUpdate').textContent = APP_LAST_UPDATE;
-            await loadApiKey();
+            await loadApiKeys();
             document.getElementById('settingsModal').classList.add('active');
         }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
@@ -1807,44 +1824,73 @@
         }
         
         // APIキー管理
-        async function saveApiKey() {
+        async function saveOpenAIKey() {
             const apiKey = document.getElementById('openaiApiKey').value.trim();
             if (!apiKey) {
-                showToast('APIキーを入力してください');
+                showToast('OpenAI APIキーを入力してください');
+                return;
+            }
+            if (!apiKey.startsWith('sk-')) {
+                showToast('無効なAPIキー形式です');
                 return;
             }
             await dbPut('settings', { id: 'openaiApiKey', key: apiKey });
-            showToast('APIキーを保存しました');
+            showToast('OpenAI APIキーを保存しました ✓');
         }
         
-        async function loadApiKey() {
-            const data = await dbGet('settings', 'openaiApiKey');
-            if (data?.key) {
-                document.getElementById('openaiApiKey').value = data.key;
+        async function saveGNewsKey() {
+            const apiKey = document.getElementById('gnewsApiKey').value.trim();
+            if (!apiKey) {
+                showToast('GNews APIキーを入力してください');
+                return;
+            }
+            await dbPut('settings', { id: 'gnewsApiKey', key: apiKey });
+            showToast('GNews APIキーを保存しました ✓');
+        }
+        
+        async function loadApiKeys() {
+            const openaiData = await dbGet('settings', 'openaiApiKey');
+            if (openaiData?.key) {
+                document.getElementById('openaiApiKey').value = openaiData.key;
+            }
+            
+            const gnewsData = await dbGet('settings', 'gnewsApiKey');
+            if (gnewsData?.key) {
+                document.getElementById('gnewsApiKey').value = gnewsData.key;
             }
         }
         
-        // 余白日報生成（任意の日付対応）
+        // ==========================================
+        // 余白日報 - 実際のニュースに基づく日報生成
+        // ==========================================
+        
         async function generateDailyPaper(forceRegenerate = false) {
             const statusEl = document.getElementById('paperStatus');
             const actionArea = document.getElementById('paperActionArea');
             
-            // 選択中の日付を使用
             const targetDate = getDateKey();
             const targetDateObj = new Date(currentDate);
             const dateStr = `${targetDateObj.getFullYear()}年${targetDateObj.getMonth() + 1}月${targetDateObj.getDate()}日`;
             
-            console.log(`日報生成開始: ${targetDate}`);
+            console.log(`=== 日報生成開始: ${targetDate} ===`);
             
-            // APIキーを取得
-            const apiKeyData = await dbGet('settings', 'openaiApiKey');
-            if (!apiKeyData?.key) {
-                showToast('設定からAPIキーを入力してください');
-                statusEl.textContent = 'APIキーが設定されていません';
+            // APIキーの確認
+            const openaiKeyData = await dbGet('settings', 'openaiApiKey');
+            const gnewsKeyData = await dbGet('settings', 'gnewsApiKey');
+            
+            if (!openaiKeyData?.key) {
+                showToast('設定からOpenAI APIキーを入力してください');
+                statusEl.textContent = 'OpenAI APIキーが未設定';
                 return;
             }
             
-            // キャッシュ確認（強制再生成でない場合）
+            if (!gnewsKeyData?.key) {
+                showToast('設定からGNews APIキーを入力してください');
+                statusEl.textContent = 'GNews APIキーが未設定';
+                return;
+            }
+            
+            // キャッシュ確認
             if (!forceRegenerate) {
                 const cachedPaper = await dbGet('notes', `paper-${targetDate}`);
                 if (cachedPaper?.content) {
@@ -1854,34 +1900,37 @@
                 }
             }
             
-            // 生成開始UI
+            // UI更新
             actionArea.innerHTML = `
                 <div class="paper-generate-btn loading" style="cursor: default;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                    生成中...
+                    ニュースを取得中...
                 </div>
             `;
-            statusEl.textContent = 'ニュースを収集しています...';
+            statusEl.textContent = 'GNews APIでニュースを取得しています...';
             
             try {
-                // ニュースを取得（全キーワードで）
-                console.log('ニュース取得開始... キーワード:', newsKeywords);
-                statusEl.textContent = `${newsKeywords.length}個のキーワードでニュースを検索中...`;
+                // Step 1: GNews APIで実際のニュースを取得
+                console.log('Step 1: GNews APIでニュース取得');
+                const newsArticles = await fetchRealNews(gnewsKeyData.key, newsKeywords);
                 
-                const newsItems = await fetchNewsForKeywords(newsKeywords);
-                console.log('取得したニュース数:', newsItems.length);
-                
-                // ニュース取得状況を表示
-                if (newsItems.length > 0) {
-                    statusEl.textContent = `${newsItems.length}件のニュースを取得。AIが分析中...`;
-                } else {
-                    statusEl.textContent = 'ニュースを取得できませんでした。キーワードから生成中...';
+                if (newsArticles.length === 0) {
+                    throw new Error('ニュースを取得できませんでした。APIキーを確認してください。');
                 }
                 
-                // GPTで日報生成
-                console.log('GPT呼び出し開始...');
-                const paperContent = await generatePaperWithGPT(apiKeyData.key, newsItems, newsKeywords, dateStr);
-                console.log('GPT呼び出し成功');
+                console.log(`取得したニュース: ${newsArticles.length}件`);
+                statusEl.textContent = `${newsArticles.length}件のニュースを取得。AI分析中...`;
+                
+                // Step 2: GPT-4oで日報を生成
+                console.log('Step 2: GPT-4oで日報生成');
+                actionArea.innerHTML = `
+                    <div class="paper-generate-btn loading" style="cursor: default;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        AI分析中...
+                    </div>
+                `;
+                
+                const paperContent = await generatePaperFromNews(openaiKeyData.key, newsArticles, dateStr);
                 
                 // 保存
                 await dbPut('notes', { id: `paper-${targetDate}`, content: paperContent, date: targetDate });
@@ -1895,7 +1944,7 @@
                 await renderPaperArchive();
                 
             } catch (error) {
-                console.error('Paper generation error:', error);
+                console.error('日報生成エラー:', error);
                 showToast('エラー: ' + error.message);
                 statusEl.textContent = 'エラー: ' + error.message;
                 await updatePaperCardForDate();
@@ -1907,286 +1956,258 @@
             await generateDailyPaper(true);
         }
         
-        // ニュース取得（複数プロキシ・リトライ対応）
-        async function fetchNewsForKeywords(keywords) {
-            const allNews = [];
+        // ==========================================
+        // GNews API でニュースを取得
+        // ==========================================
+        async function fetchRealNews(gnewsApiKey, keywords) {
+            const allArticles = [];
+            const seenUrls = new Set();
             
-            // RSS2JSONとAllOriginsの両方を試す
-            const proxyServices = [
-                {
-                    name: 'RSS2JSON',
-                    makeUrl: (rssUrl) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=10`,
-                    parseResponse: (data) => {
-                        if (data.status === 'ok' && data.items) return data.items;
-                        return null;
-                    }
-                },
-                {
-                    name: 'AllOrigins',
-                    makeUrl: (rssUrl) => `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
-                    parseResponse: (data) => {
-                        if (!data.contents) return null;
-                        return parseRSSXML(data.contents);
-                    }
-                }
-            ];
+            console.log('=== GNews API ニュース取得開始 ===');
+            console.log('キーワード:', keywords);
             
-            // 各キーワードで取得
+            // 各キーワードでニュース検索
             for (const keyword of keywords) {
-                let success = false;
-                
-                const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
-                
-                // 各プロキシを順に試す
-                for (const proxy of proxyServices) {
-                    if (success) break;
-                    
-                    try {
-                        console.log(`[${proxy.name}] ${keyword} 取得中...`);
-                        
-                        const response = await fetch(proxy.makeUrl(rssUrl), { 
-                            signal: AbortSignal.timeout(12000)
-                        });
-                        const data = await response.json();
-                        const items = proxy.parseResponse(data);
-                        
-                        if (items && items.length > 0) {
-                            console.log(`✓ [${proxy.name}] ${keyword}: ${items.length}件`);
-                            
-                            items.forEach(item => {
-                                const cleanTitle = cleanHtml(item.title || '');
-                                const cleanDesc = cleanHtml(item.description || item.content || '');
-                                
-                                // 重複チェック
-                                if (cleanTitle && !allNews.some(n => n.title === cleanTitle)) {
-                                    allNews.push({
-                                        keyword,
-                                        title: cleanTitle,
-                                        description: cleanDesc,
-                                        source: item.author || item.source || extractSource(cleanTitle),
-                                        date: item.pubDate || item.pubdate || new Date().toISOString(),
-                                        link: item.link || item.url
-                                    });
-                                }
-                            });
-                            success = true;
-                        }
-                    } catch (e) {
-                        console.warn(`✗ [${proxy.name}] ${keyword} 失敗:`, e.message);
-                    }
-                }
-                
-                if (!success) {
-                    console.warn(`△ ${keyword}: 全プロキシ失敗`);
-                }
-                
-                // レート制限対策
-                await new Promise(r => setTimeout(r, 400));
-            }
-            
-            // 日本のトップニュースも取得（追加コンテンツ）
-            if (allNews.length < 15) {
                 try {
-                    console.log('トップニュース取得中...');
-                    const topNewsUrl = `https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja`;
+                    console.log(`検索中: "${keyword}"`);
                     
-                    for (const proxy of proxyServices) {
-                        try {
-                            const response = await fetch(proxy.makeUrl(topNewsUrl), { 
-                                signal: AbortSignal.timeout(10000) 
-                            });
-                            const data = await response.json();
-                            const items = proxy.parseResponse(data);
-                            
-                            if (items && items.length > 0) {
-                                console.log(`✓ トップニュース: ${items.length}件`);
-                                items.slice(0, 5).forEach(item => {
-                                    const cleanTitle = cleanHtml(item.title || '');
-                                    if (cleanTitle && !allNews.some(n => n.title === cleanTitle)) {
-                                        allNews.push({
-                                            keyword: '日本トップニュース',
-                                            title: cleanTitle,
-                                            description: cleanHtml(item.description || item.content || ''),
-                                            source: extractSource(cleanTitle),
-                                            date: item.pubDate || item.pubdate,
-                                            link: item.link || item.url
-                                        });
-                                    }
-                                });
-                                break;
-                            }
-                        } catch (e) {
-                            console.warn(`トップニュース [${proxy.name}] 失敗`);
-                        }
+                    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(keyword)}&lang=ja&country=jp&max=10&apikey=${gnewsApiKey}`;
+                    
+                    const response = await fetch(url, {
+                        signal: AbortSignal.timeout(15000)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.warn(`GNews API エラー (${keyword}):`, response.status, errorText);
+                        continue;
                     }
+                    
+                    const data = await response.json();
+                    
+                    if (data.articles && data.articles.length > 0) {
+                        console.log(`✓ "${keyword}": ${data.articles.length}件`);
+                        
+                        data.articles.forEach(article => {
+                            // 重複チェック
+                            if (!seenUrls.has(article.url)) {
+                                seenUrls.add(article.url);
+                                allArticles.push({
+                                    keyword: keyword,
+                                    title: article.title || '',
+                                    description: article.description || '',
+                                    content: article.content || article.description || '',
+                                    source: article.source?.name || '不明',
+                                    publishedAt: article.publishedAt,
+                                    url: article.url,
+                                    image: article.image
+                                });
+                            }
+                        });
+                    } else {
+                        console.warn(`△ "${keyword}": ニュースなし`);
+                    }
+                    
+                    // APIレート制限対策（1秒待機）
+                    await new Promise(r => setTimeout(r, 1000));
+                    
                 } catch (e) {
-                    console.warn('トップニュース取得失敗:', e.message);
+                    console.error(`✗ "${keyword}" 取得失敗:`, e.message);
                 }
             }
             
-            console.log(`=== ニュース取得完了: ${allNews.length}件 ===`);
-            if (allNews.length > 0) {
-                console.log('サンプル:', allNews.slice(0, 5).map(n => `[${n.keyword}] ${n.title.slice(0, 40)}...`));
+            // 日本のトップニュースも取得
+            try {
+                console.log('日本トップニュースを取得...');
+                const topNewsUrl = `https://gnews.io/api/v4/top-headlines?lang=ja&country=jp&max=10&apikey=${gnewsApiKey}`;
+                
+                const response = await fetch(topNewsUrl, {
+                    signal: AbortSignal.timeout(15000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.articles) {
+                        console.log(`✓ トップニュース: ${data.articles.length}件`);
+                        data.articles.forEach(article => {
+                            if (!seenUrls.has(article.url)) {
+                                seenUrls.add(article.url);
+                                allArticles.push({
+                                    keyword: 'トップニュース',
+                                    title: article.title || '',
+                                    description: article.description || '',
+                                    content: article.content || article.description || '',
+                                    source: article.source?.name || '不明',
+                                    publishedAt: article.publishedAt,
+                                    url: article.url,
+                                    image: article.image
+                                });
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn('トップニュース取得失敗:', e.message);
             }
             
-            return allNews;
+            console.log(`=== ニュース取得完了: ${allArticles.length}件 ===`);
+            
+            // 最新順にソート
+            allArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+            
+            return allArticles;
         }
         
-        // RSSのXMLをパース
-        function parseRSSXML(xmlString) {
-            try {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(xmlString, 'text/xml');
-                const items = doc.querySelectorAll('item');
-                
-                return Array.from(items).map(item => ({
-                    title: item.querySelector('title')?.textContent || '',
-                    description: item.querySelector('description')?.textContent || '',
-                    link: item.querySelector('link')?.textContent || '',
-                    pubDate: item.querySelector('pubDate')?.textContent || '',
-                    source: item.querySelector('source')?.textContent || ''
-                }));
-            } catch (e) {
-                console.error('XML parse error:', e);
-                return null;
-            }
-        }
-        
-        // HTMLタグを除去
-        function cleanHtml(html) {
-            return (html || '')
-                .replace(/<[^>]*>/g, '')
-                .replace(/&nbsp;/g, ' ')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/\s+/g, ' ')
-                .trim()
-                .slice(0, 400);
-        }
-        
-        // ニュースソースを抽出
-        function extractSource(title) {
-            const match = title.match(/ - ([^-]+)$/);
-            return match ? match[1].trim() : 'Google News';
-        }
-        
-        // GPTで日報生成（統合版・高品質）
-        async function generatePaperWithGPT(apiKey, newsItems, keywords, dateStr) {
-            // ニュースをキーワード別にグループ化
-            const newsByKeyword = {};
-            newsItems.forEach(n => {
-                if (!newsByKeyword[n.keyword]) newsByKeyword[n.keyword] = [];
-                newsByKeyword[n.keyword].push(n);
+        // ==========================================
+        // GPT-4o で高品質な日報を生成
+        // ==========================================
+        async function generatePaperFromNews(apiKey, newsArticles, dateStr) {
+            // ニュースをカテゴリ別に整理
+            const newsByCategory = {};
+            newsArticles.forEach(article => {
+                const cat = article.keyword || 'その他';
+                if (!newsByCategory[cat]) newsByCategory[cat] = [];
+                newsByCategory[cat].push(article);
             });
             
-            // ニュースをフォーマット
+            // ニュースを詳細にフォーマット
             let newsText = '';
-            let totalNewsCount = 0;
+            let articleIndex = 1;
             
-            if (newsItems.length > 0) {
-                for (const [kw, items] of Object.entries(newsByKeyword)) {
-                    newsText += `\n### 【${kw}】関連ニュース\n`;
-                    items.forEach((n, i) => {
-                        newsText += `\n**${i + 1}. ${n.title}**\n`;
-                        newsText += `内容: ${n.description || '（概要なし）'}\n`;
-                        newsText += `出典: ${n.source} | ${n.date ? new Date(n.date).toLocaleDateString('ja-JP') : '日付不明'}\n`;
-                        totalNewsCount++;
-                    });
-                }
-            } else {
-                newsText = '（ニュースを取得できませんでした。キーワードに基づいて一般的な動向を分析してください）';
+            for (const [category, articles] of Object.entries(newsByCategory)) {
+                newsText += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                newsText += `【${category}】${articles.length}件のニュース\n`;
+                newsText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                
+                articles.forEach(article => {
+                    const pubDate = article.publishedAt ? new Date(article.publishedAt).toLocaleString('ja-JP') : '日時不明';
+                    newsText += `\n[記事${articleIndex}] ${article.title}\n`;
+                    newsText += `出典: ${article.source} | ${pubDate}\n`;
+                    newsText += `概要: ${article.description || '（概要なし）'}\n`;
+                    if (article.content && article.content !== article.description) {
+                        newsText += `本文抜粋: ${article.content.slice(0, 500)}${article.content.length > 500 ? '...' : ''}\n`;
+                    }
+                    newsText += `URL: ${article.url}\n`;
+                    articleIndex++;
+                });
             }
             
-            const prompt = `# 余白日報 編集指示書
+            const totalNewsCount = newsArticles.length;
+            
+            // 徹底的に改善したプロンプト
+            const prompt = `# 🗞️ 余白日報 編集指示書
 
-あなたは「余白日報」の編集長です。${dateStr}の日報を作成してください。
+あなたは「余白日報」という個人向けプレミアム・デイリーレポートの編集長です。
+**実際のニュース記事**を分析し、読者専用の価値ある日報を作成してください。
 
-## 📋 読者プロフィール
-- **属性**: 30代男性、テクノロジー企業の起業家
-- **関心領域**: 
-  - AI・テクノロジー最新動向
-  - ケア（介護・福祉・医療）
-  - アート・文化
-  - 難聴支援技術
-  - ヘラルボニー（障害×アート）
-  - ピクシーダストテクノロジーズ
-- **価値観**: 「余白」を大切にする（効率一辺倒ではない、人間らしい豊かさ）
-- **読書時間**: 朝のルーティンで10-15分
+## 📅 発行日
+${dateStr}
 
-## 📰 本日のニュースソース
+## 👤 読者プロフィール
+- **職業**: テクノロジー企業の起業家（30代男性）
+- **会社**: 難聴支援や介護福祉×テクノロジーに関連
+- **興味関心**:
+  1. AI・生成AI・テクノロジー最新動向
+  2. 介護・福祉・医療（ケアテック）
+  3. 難聴・聴覚支援技術
+  4. ヘラルボニー（障害者アート）
+  5. ピクシーダストテクノロジーズ（落合陽一）
+  6. アート・文化・デザイン
+  7. スタートアップ・起業
+- **価値観**: 「余白」を大切にする（効率だけでなく人間らしい豊かさを追求）
+- **読書時間**: 朝の15-20分をかけてじっくり読む
+
+## 📰 本日取得したニュース（${totalNewsCount}件）
 ${newsText}
 
-## ✍️ 執筆ガイドライン
+## ✍️ 執筆要件（厳守）
+
+### 絶対に守るべきルール
+1. **実際のニュース記事の内容のみ**を元に執筆する
+2. **架空の情報や想像で補完しない**
+3. 各ニュースの**事実**を正確に伝え、そこから**分析**と**示唆**を導く
+4. 読み応えのある**充実したボリューム**（合計3000-4000文字程度）
 
 ### 1. ヘッドライン（必須）
-- その日を象徴する印象的な一言
-- 20文字以内
-- 読者の心に残るキャッチーな表現
+- その日のニュースを象徴する**印象的な一言**
+- **18-22文字**
+- 記憶に残るキャッチーな表現
+- 例: 「AIと人の境界、揺らぐ日」「ケアの未来、静かに動く」
 
 ### 2. エグゼクティブサマリー（必須）
-- 300文字程度
-- 本日の重要ポイント3つを明確に
-- ビジネスパーソンが30秒で概要を把握できる構成
+- **400-500文字**
+- 今日押さえるべき**重要ポイント3-4つ**を明確に
+- ビジネスパーソンが1分で全体像を把握できる構成
+- 各ポイントは具体的なニュースに基づく
 
-### 3. 各セクション（5-6セクション必須）
-各セクションは以下の構成で400-500文字：
+### 3. トピックセクション（5-7セクション必須）
+各セクションは**実際のニュース記事**を元に以下の構成で**500-700文字**:
 
-**A. ニュース概要**（150文字）
-- 何が起きたか、客観的事実
+**【セクションタイトル】**
+ニュースの内容を反映した具体的なタイトル
 
-**B. 背景・文脈分析**（200文字）
-- なぜ重要か
-- 業界や社会への影響
-- 関連する歴史的経緯や他のニュースとの関連
+**【ニュースファクト】**（200文字）
+- 何が起きたか（Who, What, When, Where）
+- 数字や固有名詞を含む具体的な事実
+- 出典を明記
 
-**C. 読者への示唆**（150文字）
-- この情報を読者はどう活かせるか
-- 具体的なアクションや考えるべきポイント
+**【背景・文脈】**（200文字）
+- なぜこれが重要なのか
+- 業界や社会における位置づけ
+- 関連する過去の動きや他のニュースとの関連
+
+**【読者への示唆】**（200文字）
+- この情報を読者（起業家）はどう活かせるか
+- ビジネスや事業への具体的な示唆
+- 考えるべきポイントや問いかけ
 
 ### 4. 今日の問い（必須）
-- 読者が1日かけて考える価値のある問いかけ
+- 読者が1日かけて考える価値のある**深い問いかけ**
+- ニュースから導き出される本質的な問い
+- **60-100文字**
 - 哲学的かつ実践的
-- 50-80文字
 
 ### 5. クロージング（必須）
-- 「余白」の哲学に基づく締めくくり
+- 「余白」の哲学を反映した締めくくり
 - 効率や成果だけでない価値を示唆
-- 60-80文字
+- 明日への希望を感じさせる
+- **80-120文字**
 
-## 📝 出力形式（JSON）
+## 📝 出力JSON形式
 
 \`\`\`json
 {
-  "headline": "ヘッドライン（20文字以内）",
-  "summary": "エグゼクティブサマリー（300文字）",
+  "headline": "ヘッドライン（18-22文字）",
+  "summary": "エグゼクティブサマリー（400-500文字）",
   "sections": [
     {
-      "title": "セクションタイトル",
-      "emoji": "🔥",
-      "news_summary": "ニュース概要（150文字）",
-      "analysis": "背景・文脈分析（200文字）",
-      "insight": "読者への示唆（150文字）"
+      "title": "セクションタイトル（具体的に）",
+      "emoji": "適切な絵文字1つ",
+      "news_summary": "ニュースファクト（200文字・出典明記）",
+      "analysis": "背景・文脈（200文字）",
+      "insight": "読者への示唆（200文字）",
+      "source": "記事の出典メディア名"
     }
   ],
-  "question_of_day": "今日の問い（50-80文字）",
-  "closing": "クロージング（60-80文字）",
+  "question_of_day": "今日の問い（60-100文字）",
+  "closing": "クロージング（80-120文字）",
   "news_count": ${totalNewsCount},
-  "generated_date": "${dateStr}"
+  "generated_date": "${dateStr}",
+  "sources": ["引用したメディア名のリスト"]
 }
 \`\`\`
 
-## ⚠️ 重要な注意事項
-1. **必ず有効なJSONのみを出力**してください
-2. **セクションは5-6個**作成してください
-3. **各セクションは充実した内容**で、読み応えのあるものに
-4. ニュースがない場合でも、キーワードに基づいて**業界の最新動向や考察**を提供
-5. 批判的ではなく**建設的な視点**で
-6. 読者の「余白を大切にする」価値観を尊重した内容に`;
+## ⚠️ 重要な制約
+1. **必ず有効なJSONのみ**を出力（説明文や前置きは不要）
+2. **セクションは5-7個**を必ず作成
+3. **各セクションは実際のニュースに基づく**こと
+4. 架空の情報を含めない
+5. セクションタイトルは「〇〇について」のような抽象的なものではなく、**具体的なニュース内容を反映**したものに
+6. 出典（メディア名）を必ず含める`;
 
-            // GPT-4oで高品質な日報を生成
+            console.log('GPT-4o 呼び出し開始...');
+            console.log('プロンプト文字数:', prompt.length);
+            
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -2194,38 +2215,47 @@ ${newsText}
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'gpt-4o',  // 高品質モデル
+                    model: 'gpt-4o',
                     messages: [
                         {
                             role: 'system',
-                            content: 'あなたは一流の新聞編集者です。読者に価値ある洞察を提供する高品質なコンテンツを作成します。必ず指定されたJSON形式のみで出力してください。'
+                            content: `あなたは「余白日報」の編集長です。
+実際のニュース記事を分析し、読者に価値ある洞察を提供する高品質な日報を作成します。
+
+重要なルール:
+1. 提供されたニュース記事の内容のみを使用する
+2. 架空の情報や想像で補完しない
+3. 各セクションは必ず実際のニュースに基づく
+4. 出典を明記する
+5. 必ずJSON形式のみで出力する（説明文不要）`
                         },
                         { role: 'user', content: prompt }
                     ],
-                    temperature: 0.8,
-                    max_tokens: 4000  // 充実した内容のため増加
+                    temperature: 0.7,
+                    max_tokens: 6000
                 })
             });
             
             if (!response.ok) {
                 const error = await response.json();
                 console.error('OpenAI API Error:', error);
-                throw new Error(error.error?.message || 'API呼び出しに失敗しました');
+                throw new Error(error.error?.message || 'OpenAI APIエラー');
             }
             
             const data = await response.json();
             const content = data.choices[0].message.content;
-            console.log('GPT Response length:', content.length);
             
-            // JSONをパース（コードブロック内のJSONも対応）
+            console.log('GPT Response 文字数:', content.length);
+            console.log('使用トークン:', data.usage);
+            
+            // JSONをパース
             let jsonStr = content;
             
-            // ```json ... ``` の形式を処理
+            // ```json ... ``` 形式を処理
             const codeBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
             if (codeBlockMatch) {
                 jsonStr = codeBlockMatch[1];
             } else {
-                // 純粋なJSONを探す
                 const jsonMatch = content.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                     jsonStr = jsonMatch[0];
@@ -2233,21 +2263,25 @@ ${newsText}
             }
             
             if (!jsonStr || !jsonStr.includes('{')) {
-                console.error('Invalid JSON response:', content);
+                console.error('Invalid JSON:', content.slice(0, 500));
                 throw new Error('有効なJSONが返されませんでした');
             }
             
             try {
                 const parsed = JSON.parse(jsonStr);
-                console.log('Parsed sections:', parsed.sections?.length || 0);
+                console.log('✓ パース成功');
+                console.log('  - ヘッドライン:', parsed.headline);
+                console.log('  - セクション数:', parsed.sections?.length || 0);
+                console.log('  - サマリー文字数:', parsed.summary?.length || 0);
                 return parsed;
             } catch (e) {
-                console.error('JSON parse error:', e, 'Input:', jsonStr.slice(0, 500));
-                throw new Error('JSONのパースに失敗しました');
+                console.error('JSON parse error:', e);
+                console.error('Input:', jsonStr.slice(0, 1000));
+                throw new Error('JSONパースエラー');
             }
         }
         
-        // 日報を表示（充実版対応）
+        // 日報を表示（プレミアム版）
         function showDailyPaper(content, date) {
             const paper = document.getElementById('dailyPaper');
             const paperDate = document.getElementById('paperDate');
@@ -2257,31 +2291,57 @@ ${newsText}
             const weekday = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
             paperDate.textContent = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日（${weekday}）`;
             
+            // ヘッダー部分
             let html = `
                 <div class="paper-section">
-                    <div class="paper-headline" style="font-size: 22px; text-align: center; margin-bottom: 16px; color: #8b5a2b;">
-                        「${content.headline}」
+                    <div class="paper-headline" style="font-size: 24px; text-align: center; margin-bottom: 20px; color: #8b5a2b; font-family: var(--font-serif); letter-spacing: 0.05em;">
+                        「${content.headline || '本日の日報'}」
                     </div>
-                    <div class="paper-summary" style="background: rgba(139,90,43,0.08); padding: 16px; border-radius: 8px; border-left: 4px solid #8b5a2b;">
-                        <div style="font-size: 11px; color: #8b5a2b; margin-bottom: 8px; font-weight: 600;">📋 EXECUTIVE SUMMARY</div>
-                        ${content.summary}
+                    <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">
+                        ${content.news_count ? `📰 ${content.news_count}件のニュースを分析` : ''}
+                        ${content.sources?.length ? ` | 出典: ${content.sources.slice(0, 5).join(', ')}${content.sources.length > 5 ? ' 他' : ''}` : ''}
                     </div>
-                    ${content.news_count ? `<div style="text-align: right; font-size: 11px; color: var(--text-muted); margin-top: 8px;">📰 ${content.news_count}件のニュースを分析</div>` : ''}
+                    <div class="paper-summary" style="background: rgba(139,90,43,0.08); padding: 20px; border-radius: 10px; border-left: 4px solid #8b5a2b;">
+                        <div style="font-size: 11px; color: #8b5a2b; margin-bottom: 10px; font-weight: 600; letter-spacing: 0.1em;">📋 EXECUTIVE SUMMARY</div>
+                        <div style="font-size: 14px; line-height: 1.9; white-space: pre-line;">${content.summary || ''}</div>
+                    </div>
                 </div>
             `;
             
-            content.sections?.forEach(section => {
-                // 新フォーマット（news_summary, analysis, insight）と旧フォーマット（content）の両方に対応
-                const mainContent = section.analysis || section.content || '';
+            // 各セクション
+            content.sections?.forEach((section, idx) => {
                 const newsSum = section.news_summary || '';
+                const analysis = section.analysis || section.content || '';
                 const insight = section.insight || '';
+                const source = section.source || '';
                 
                 html += `
-                    <div class="paper-section">
-                        <div class="paper-section-title">${section.emoji || '📌'} ${section.title}</div>
-                        ${newsSum ? `<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">📰 ${newsSum}</div>` : ''}
-                        <div class="paper-section-content">${mainContent}</div>
-                        ${insight ? `<div class="paper-summary" style="margin-top: 14px; font-style: italic; background: rgba(107,143,113,0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--accent-sage);">💡 ${insight}</div>` : ''}
+                    <div class="paper-section" style="border-left: 3px solid rgba(139,90,43,0.3); padding-left: 16px; margin-left: 8px;">
+                        <div class="paper-section-title" style="font-size: 17px; margin-bottom: 16px;">
+                            ${section.emoji || '📌'} ${section.title}
+                            ${source ? `<span style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 8px;">— ${source}</span>` : ''}
+                        </div>
+                        
+                        ${newsSum ? `
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 10px; color: var(--accent-blue); margin-bottom: 6px; font-weight: 600;">📰 WHAT HAPPENED</div>
+                                <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.8; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">${newsSum}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${analysis ? `
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 10px; color: var(--accent-sage); margin-bottom: 6px; font-weight: 600;">🔍 CONTEXT & ANALYSIS</div>
+                                <div style="font-size: 14px; line-height: 1.9;">${analysis}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${insight ? `
+                            <div style="background: rgba(107,143,113,0.1); padding: 14px; border-radius: 8px; border-left: 3px solid var(--accent-sage);">
+                                <div style="font-size: 10px; color: var(--accent-sage); margin-bottom: 6px; font-weight: 600;">💡 INSIGHT FOR YOU</div>
+                                <div style="font-size: 13px; line-height: 1.8; font-style: italic;">${insight}</div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             });
@@ -2289,22 +2349,24 @@ ${newsText}
             // 今日の問い
             if (content.question_of_day) {
                 html += `
-                    <div class="paper-section" style="text-align: center; background: linear-gradient(135deg, rgba(139,90,43,0.1) 0%, rgba(107,143,113,0.1) 100%); padding: 24px; border-radius: 12px; margin: 20px 0;">
-                        <div style="font-size: 12px; color: #8b5a2b; margin-bottom: 8px;">🤔 TODAY'S QUESTION</div>
-                        <div style="font-family: var(--font-serif); font-size: 16px; color: var(--text-primary); line-height: 1.8;">
+                    <div class="paper-section" style="text-align: center; background: linear-gradient(135deg, rgba(139,90,43,0.12) 0%, rgba(107,143,113,0.12) 100%); padding: 28px; border-radius: 14px; margin: 24px 0;">
+                        <div style="font-size: 11px; color: #8b5a2b; margin-bottom: 12px; letter-spacing: 0.15em; font-weight: 600;">🤔 TODAY'S QUESTION</div>
+                        <div style="font-family: var(--font-serif); font-size: 17px; color: var(--text-primary); line-height: 1.9;">
                             ${content.question_of_day}
                         </div>
                     </div>
                 `;
             }
             
+            // クロージング
             html += `
-                <div class="paper-section" style="text-align: center; border-bottom: none; padding-top: 20px;">
-                    <div style="font-family: var(--font-serif); font-size: 14px; color: #8b5a2b; font-style: italic;">
-                        ✨ ${content.closing}
+                <div class="paper-section" style="text-align: center; border-bottom: none; padding-top: 24px;">
+                    <div style="font-family: var(--font-serif); font-size: 15px; color: #8b5a2b; font-style: italic; line-height: 1.8;">
+                        ✨ ${content.closing || '今日も良い一日を。'}
                     </div>
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed rgba(139,90,43,0.3); font-size: 11px; color: var(--text-muted);">
-                        余白日報 — 質量と余白の間で、今日を知る
+                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed rgba(139,90,43,0.3); font-size: 11px; color: var(--text-muted);">
+                        余白日報 — 質量と余白の間で、今日を知る<br>
+                        <span style="font-size: 10px; opacity: 0.7;">${content.generated_date || ''}</span>
                     </div>
                 </div>
             `;
