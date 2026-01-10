@@ -879,7 +879,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.4.0';
+        const APP_VERSION = 'v3.5.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -2235,6 +2235,9 @@
                         newsText += `本文抜粋: ${article.content.slice(0, 500)}${article.content.length > 500 ? '...' : ''}\n`;
                     }
                     newsText += `URL: ${article.url}\n`;
+                    if (article.image) {
+                        newsText += `画像URL: ${article.image}\n`;
+                    }
                     articleIndex++;
                 });
             }
@@ -2257,12 +2260,17 @@ ${dateStr}
   1. AI・生成AI・テクノロジー最新動向
   2. 介護・福祉・医療（ケアテック）
   3. 難聴・聴覚支援技術
-  4. ヘラルボニー（障害者アート）
+  4. ヘラルボニー（障害のある方のアート）
   5. ピクシーダストテクノロジーズ（落合陽一）
   6. アート・文化・デザイン
   7. スタートアップ・起業
 - **価値観**: 「余白」を大切にする（効率だけでなく人間らしい豊かさを追求）
 - **読書時間**: 朝の15-20分をかけてじっくり読む
+
+## ⭐ 最優先キーワード（必ずセクションを作成）
+以下のキーワードに関するニュースがある場合は、**必ず独立したセクションとして取り上げる**こと：
+- **ヘラルボニー** - 1件でもあれば必ずセクション化
+- **ピクシーダストテクノロジーズ** / **落合陽一** - 1件でもあれば必ずセクション化
 
 ## 📰 本日取得したニュース（${totalNewsCount}件）
 ${newsText}
@@ -2290,22 +2298,24 @@ ${newsText}
 ### 3. トピックセクション（提供されたニュース全てをカバー）
 - **提供されたニュース記事を全て使い切る**こと（最低10セクション以上）
 - 同じカテゴリのニュースは1セクションにまとめてOK
-- 各セクションは**実際のニュース記事**を元に以下の構成で**400-600文字**:
+- 各セクションは**実際のニュース記事**を元に以下の構成で**700-1000文字**:
 
 **【セクションタイトル】**
 ニュースの内容を反映した具体的なタイトル
 
-**【ニュースファクト】**（200文字）
+**【ニュースファクト】**（250-300文字）
 - 何が起きたか（Who, What, When, Where）
 - 数字や固有名詞を含む具体的な事実
 - 出典を明記
 
-**【背景・文脈】**（200文字）
+**【背景・文脈と深掘り解説】**（350-450文字）
 - なぜこれが重要なのか
 - 業界や社会における位置づけ
 - 関連する過去の動きや他のニュースとの関連
+- この出来事の本質的な意味
+- 今後の展開の予測や影響範囲
 
-**【読者への示唆】**（200文字）
+**【読者への示唆】**（200-250文字）
 - この情報を読者（起業家）はどう活かせるか
 - ビジネスや事業への具体的な示唆
 - 考えるべきポイントや問いかけ
@@ -2332,12 +2342,13 @@ ${newsText}
     {
       "title": "セクションタイトル（具体的に）",
       "emoji": "適切な絵文字1つ",
-      "news_summary": "ニュースファクト（200文字・出典明記）",
-      "analysis": "背景・文脈（200文字）",
-      "insight": "読者への示唆（200文字）",
+      "news_summary": "ニュースファクト（250-300文字・出典明記）",
+      "analysis": "背景・文脈と深掘り解説（350-450文字）",
+      "insight": "読者への示唆（200-250文字）",
       "source": "記事の出典メディア名",
       "source_title": "引用した元記事のタイトル（そのままコピー）",
-      "source_url": "引用した記事のURL（提供されたURLをそのまま使用）"
+      "source_url": "引用した記事のURL（提供されたURLをそのまま使用）",
+      "image_url": "記事の画像URL（提供されていればそのままコピー、なければ空文字）"
     }
   ],
   "question_of_day": "今日の問い（60-100文字）",
@@ -2386,7 +2397,7 @@ ${newsText}
                         { role: 'user', content: prompt }
                     ],
                     temperature: 0.7,
-                    max_tokens: 10000
+                    max_tokens: 12000
                 })
             });
             
@@ -2467,6 +2478,7 @@ ${newsText}
                 const source = section.source || '';
                 const sourceTitle = section.source_title || '';
                 const sourceUrl = section.source_url || '';
+                const imageUrl = section.image_url || '';
                 
                 html += `
                     <div class="paper-section" style="border-left: 3px solid rgba(139,90,43,0.3); padding-left: 16px; margin-left: 8px;">
@@ -2495,12 +2507,19 @@ ${newsText}
                             </div>
                         ` : ''}
                         
-                        <!-- 引用元 -->
-                        <div style="padding: 10px 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 12px;">
-                            <div style="color: var(--text-muted); margin-bottom: 4px;">📎 出典${source ? `: ${source}` : ''}</div>
+                        <!-- 引用元（画像プレビュー付き） -->
+                        <div style="padding: 12px; background: var(--bg-secondary); border-radius: 10px; font-size: 12px;">
+                            ${imageUrl ? `
+                                <div style="margin-bottom: 10px; border-radius: 8px; overflow: hidden;">
+                                    <img src="${imageUrl}" alt="" 
+                                         style="width: 100%; height: auto; max-height: 180px; object-fit: cover; display: block;"
+                                         onerror="this.style.display='none'">
+                                </div>
+                            ` : ''}
+                            <div style="color: var(--text-muted); margin-bottom: 4px; font-size: 10px;">📎 出典${source ? `: ${source}` : ''}</div>
                             ${sourceUrl ? `
                                 <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" 
-                                   style="color: var(--accent-blue); text-decoration: none; line-height: 1.5; display: block;">
+                                   style="color: var(--accent-blue); text-decoration: none; line-height: 1.5; display: block; font-size: 13px;">
                                     ${sourceTitle || '元記事を確認 →'}
                                 </a>
                             ` : (sourceTitle ? `<span style="color: var(--text-secondary);">${sourceTitle}</span>` : '')}
