@@ -492,13 +492,13 @@
                     <div class="habit-list" id="morningHabits"></div>
                 </div>
                 <div class="section" id="daytimeSection">
-                    <div class="section-header"><span class="section-title">☀️ 日中のルーティン</span><span class="section-badge" style="background: var(--accent-sage-dim); color: var(--accent-sage);" id="daytimeTimeBadge">12:00〜</span></div>
-                    <div class="section-header"><span></span><span class="section-progress" id="daytimeProgress">0/5</span></div>
+                    <div class="section-header"><span class="section-title">☀️ 日中のルーティン</span><span class="section-badge" style="background: var(--accent-sage-dim); color: var(--accent-sage);" id="daytimeTimeBadge">11:00〜</span></div>
+                    <div class="section-header"><span style="font-size: 11px; color: var(--accent-sage);">14時間ファスティング後</span><span class="section-progress" id="daytimeProgress">0/5</span></div>
                     <div class="habit-list" id="daytimeHabits"></div>
                 </div>
                 <div class="section" id="eveningSection">
-                    <div class="section-header"><span class="section-title">🌆 夕方のルーティン</span><span class="section-badge evening" id="eveningTimeBadge" onclick="openSettings()">21:00〜</span></div>
-                    <div class="section-header"><span></span><span class="section-progress" id="eveningProgress">0/3</span></div>
+                    <div class="section-header"><span class="section-title">🌆 夕方のルーティン</span><span class="section-badge evening" id="eveningTimeBadge" onclick="openSettings()">20:00〜</span></div>
+                    <div class="section-header"><span style="font-size: 11px; color: var(--accent-blue);">最後の食事は21時まで</span><span class="section-progress" id="eveningProgress">0/4</span></div>
                     <div class="habit-list" id="eveningHabits"></div>
                 </div>
                 <div class="section" id="nightSection">
@@ -661,17 +661,18 @@
             { id: 'caffeine', name: 'カフェインは午前中のみ ✓', duration: 1 }
         ];
 
-        // 日中ルーティン（12:00〜）
+        // 日中ルーティン（11:00〜）- 14時間ファスティング後の食事開始
         const DAYTIME_HABITS = [
-            { id: 'lunch', name: '昼食：高タンパク・低脂質・低糖質', duration: 30 },
+            { id: 'lunch', name: '昼食：高タンパク・低脂質・低糖質（11時以降）', duration: 30 },
             { id: 'no_snack', name: '甘い物・間食をしない ✓', duration: 1 },
             { id: 'hydration', name: '水をこまめに飲む（合計2〜3L）✓', duration: 1 },
             { id: 'walk_17', name: '17時前後に5分歩く or ストレッチ', duration: 5 },
             { id: 'walking', name: 'ウォーキング合計60〜90分', duration: 90 }
         ];
 
-        // 夕方ルーティン（21:00〜）
+        // 夕方ルーティン（20:00〜）- 最後の食事は21時まで
         const EVENING_HABITS = [
+            { id: 'dinner', name: '夕食（20:00-21:00）→ 14時間ファスティング開始', duration: 60 },
             { id: 'work_end', name: '21:00に仕事終了（PCを閉じる）', duration: 5 },
             { id: 'review', name: '今日やったことを3つ書く（評価しない）', duration: 10 },
             { id: 'reset', name: '散歩 or シャワー（15分・考え事禁止）', duration: 15 }
@@ -823,7 +824,22 @@
         let selectedPlanYear = 2026;
         let db = null;
         let newsKeywords = [...DEFAULT_KEYWORDS];
-        let settings = { morningStart: '07:00', daytimeStart: '12:00', eveningStart: '21:00', nightStart: '22:00' };
+        let settings = { morningStart: '07:00', daytimeStart: '11:00', eveningStart: '20:00', nightStart: '22:00' };
+        
+        // 古いIDから新しいIDへのマッピング（データ移行用）
+        const HABIT_ID_MIGRATION = {
+            // 旧朝ルーティン → 新朝ルーティン
+            'wake': 'water',           // 起床・白湯 → 水500ml
+            'meditation': null,        // 瞑想（削除）
+            'walk': 'morning_move',    // 朝散歩 → 軽運動
+            'exercise': null,          // トレーニング（削除）
+            'breakfast': null,         // 朝食（削除 - ファスティング）
+            // 旧夜ルーティン → 新夕方/夜ルーティン
+            'reading': null,           // 読書（削除）
+            'study': null,             // MBA学習（削除）
+            'journal': 'review',       // 日記 → 振り返り
+            'night_meditation': 'reset' // 入浴 → リセット
+        };
 
         // ============================================
         // THEME
@@ -880,6 +896,51 @@
                 req.onsuccess = () => resolve(req.result);
             });
         }
+        
+        // データマイグレーション: 古いIDのデータを新しいIDにコピー
+        async function migrateHabitData() {
+            const migrationDone = await dbGet('settings', 'migrationV2Done');
+            if (migrationDone?.done) return; // 既にマイグレーション済み
+            
+            const allHabits = await dbGetAll('habits');
+            for (const habit of allHabits) {
+                // 古いIDを検出してマイグレーション
+                for (const [oldId, newId] of Object.entries(HABIT_ID_MIGRATION)) {
+                    if (newId && habit.id.includes(`-morning-${oldId}`) && habit.completed) {
+                        const newKey = habit.id.replace(`-morning-${oldId}`, `-morning-${newId}`);
+                        const existing = await dbGet('habits', newKey);
+                        if (!existing) {
+                            await dbPut('habits', { id: newKey, completed: true });
+                        }
+                    }
+                    if (newId && habit.id.includes(`-evening-${oldId}`) && habit.completed) {
+                        const newKey = habit.id.replace(`-evening-${oldId}`, `-evening-${newId}`);
+                        const existing = await dbGet('habits', newKey);
+                        if (!existing) {
+                            await dbPut('habits', { id: newKey, completed: true });
+                        }
+                    }
+                }
+            }
+            
+            await dbPut('settings', { id: 'migrationV2Done', done: true, timestamp: new Date().toISOString() });
+            console.log('データマイグレーション完了');
+        }
+        
+        // 体重を前日から引き継ぐ
+        async function getPreviousWeight() {
+            // 過去7日間を探す
+            for (let i = 1; i <= 7; i++) {
+                const prevDate = new Date(currentDate);
+                prevDate.setDate(prevDate.getDate() - i);
+                const dateKey = formatDate(prevDate);
+                const data = await dbGet('health', `${dateKey}-weight`);
+                if (data?.value) {
+                    return data.value;
+                }
+            }
+            return '60.0'; // デフォルト値
+        }
 
         // ============================================
         // UTILITIES
@@ -919,10 +980,10 @@
             document.getElementById('currentTime').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            const morningStart = timeToMinutes(settings.morningStart);
-            const daytimeStart = timeToMinutes(settings.daytimeStart || '12:00');
-            const eveningStart = timeToMinutes(settings.eveningStart);
-            const nightStart = timeToMinutes(settings.nightStart || '22:00');
+            const morningStart = timeToMinutes(settings.morningStart);           // 7:00
+            const daytimeStart = timeToMinutes(settings.daytimeStart || '11:00'); // 11:00
+            const eveningStart = timeToMinutes(settings.eveningStart);            // 20:00
+            const nightStart = timeToMinutes(settings.nightStart || '22:00');     // 22:00
             
             const periodEl = document.getElementById('timePeriod');
             const morningSection = document.getElementById('morningSection');
@@ -932,35 +993,35 @@
             
             // リセット
             periodEl.className = 'time-period';
+            periodEl.style.background = '';
+            periodEl.style.color = '';
             morningSection.classList.remove('highlighted');
             daytimeSection.classList.remove('highlighted');
+            daytimeSection.style.background = '';
             eveningSection.classList.remove('highlighted', 'evening');
             nightSection.classList.remove('highlighted');
+            nightSection.style.background = '';
             
             if (currentMinutes >= morningStart && currentMinutes < daytimeStart) {
-                periodEl.textContent = '🌅 朝のルーティンの時間です';
+                periodEl.textContent = '🌅 朝のルーティン（ファスティング中）';
                 periodEl.classList.add('morning');
                 morningSection.classList.add('highlighted');
             } else if (currentMinutes >= daytimeStart && currentMinutes < eveningStart) {
-                periodEl.textContent = '☀️ 日中のルーティンの時間です';
+                periodEl.textContent = '☀️ 日中（食事OK 11:00-21:00）';
                 periodEl.style.background = 'var(--accent-sage-dim)';
                 periodEl.style.color = 'var(--accent-sage)';
                 daytimeSection.classList.add('highlighted');
                 daytimeSection.style.background = 'var(--accent-sage-dim)';
             } else if (currentMinutes >= eveningStart && currentMinutes < nightStart) {
-                periodEl.textContent = '🌆 夕方のルーティンの時間です';
+                periodEl.textContent = '🌆 夕方（夕食は21時まで）';
                 periodEl.classList.add('evening');
                 eveningSection.classList.add('highlighted', 'evening');
             } else if (currentMinutes >= nightStart || currentMinutes < morningStart) {
-                periodEl.textContent = '🌙 判断禁止ゾーン - 夜のルーティンの時間です';
+                periodEl.textContent = '🌙 判断禁止ゾーン（ノンカロリーのみ）';
                 periodEl.style.background = 'rgba(139, 92, 246, 0.15)';
                 periodEl.style.color = '#8b5cf6';
                 nightSection.classList.add('highlighted');
                 nightSection.style.background = 'rgba(139, 92, 246, 0.15)';
-            } else {
-                periodEl.textContent = '';
-                periodEl.style.background = '';
-                periodEl.style.color = '';
             }
             
             updateTheme();
@@ -1082,7 +1143,14 @@
             container.innerHTML = '';
             for (const item of HEALTH_ITEMS) {
                 const data = await dbGet('health', `${dateKey}-${item.id}`);
-                const value = data?.value || item.default;
+                let value = data?.value;
+                
+                // 体重は前日から引き継ぐ（今日の値がない場合）
+                if (!value && item.id === 'weight') {
+                    value = await getPreviousWeight();
+                }
+                value = value || item.default;
+                
                 const div = document.createElement('div');
                 div.className = 'health-item';
                 div.innerHTML = `<div class="health-icon">${item.icon}</div><div class="health-label">${item.label}</div><div class="health-value"><input type="number" step="0.1" value="${value}" onchange="updateHealth('${item.id}', this.value)" onclick="this.select()"><span class="health-unit">${item.unit}</span></div>`;
@@ -1568,6 +1636,7 @@
             try {
                 updateTheme();
                 await initDB();
+                await migrateHabitData(); // データマイグレーション
                 await loadSettings();
                 await loadKeywords();
                 updateDateTime();
