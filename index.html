@@ -879,7 +879,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.5.0';
+        const APP_VERSION = 'v3.6.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -2051,7 +2051,7 @@
                         const data = await response.json();
                         if (data.results && data.results.length > 0) {
                             console.log(`✓ [NewsData.io] "${keyword}": ${data.results.length}件`);
-                            data.results.slice(0, 5).forEach(item => {
+                            data.results.slice(0, 10).forEach(item => {
                                 if (!seenTitles.has(item.title)) {
                                     seenTitles.add(item.title);
                                     articles.push({
@@ -2105,7 +2105,7 @@
                     
                     if (items && items.length > 0) {
                         console.log(`✓ [${proxy.name}] トップニュース: ${items.length}件`);
-                        items.slice(0, 10).forEach(item => {
+                        items.slice(0, 20).forEach(item => {
                             const title = cleanHtml(item.title || '');
                             if (title && !seenTitles.has(title)) {
                                 seenTitles.add(title);
@@ -2140,7 +2140,7 @@
                         
                         if (items && items.length > 0) {
                             console.log(`✓ [${proxy.name}] "${keyword}": ${items.length}件`);
-                            items.slice(0, 5).forEach(item => {
+                            items.slice(0, 10).forEach(item => {
                                 const title = cleanHtml(item.title || '');
                                 if (title && !seenTitles.has(title)) {
                                     seenTitles.add(title);
@@ -2296,8 +2296,8 @@ ${newsText}
 - 各ポイントは具体的なニュースに基づく
 
 ### 3. トピックセクション（提供されたニュース全てをカバー）
-- **提供されたニュース記事を全て使い切る**こと（最低10セクション以上）
-- 同じカテゴリのニュースは1セクションにまとめてOK
+- **提供されたニュース記事を全て使い切る**こと（**最低15-20セクション**）
+- 重要なニュースは単独セクション、関連性の高いニュースのみまとめてOK
 - 各セクションは**実際のニュース記事**を元に以下の構成で**700-1000文字**:
 
 **【セクションタイトル】**
@@ -2361,13 +2361,14 @@ ${newsText}
 
 ## ⚠️ 重要な制約
 1. **必ず有効なJSONのみ**を出力（説明文や前置きは不要）
-2. **提供されたニュースを全て使い切る**（最低10セクション以上）
+2. **提供されたニュースを全て使い切る**（**最低15-20セクション**）
 3. **各セクションは実際のニュースに基づく**こと
 4. 架空の情報を含めない
 5. セクションタイトルは「〇〇について」のような抽象的なものではなく、**具体的なニュース内容を反映**したものに
 6. 出典（メディア名）を必ず含める
 7. **source_url は必須**：各セクションに引用した記事のURLを必ず含める（提供されたURLをそのままコピー）
-8. **ニュースの鮮度を重視**：本日のニュースを優先して使用する`;
+8. **ニュースの鮮度を重視**：本日のニュースを優先して使用する
+9. **量を重視**：できるだけ多くのニュースを取り上げ、読者に幅広い情報を提供する`;
 
             console.log('GPT-4o 呼び出し開始...');
             console.log('プロンプト文字数:', prompt.length);
@@ -2397,7 +2398,7 @@ ${newsText}
                         { role: 'user', content: prompt }
                     ],
                     temperature: 0.7,
-                    max_tokens: 12000
+                    max_tokens: 16000
                 })
             });
             
