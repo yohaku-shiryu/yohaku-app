@@ -817,19 +817,20 @@
             </div>
             
             <div class="settings-item" style="margin-top: 20px;">
-                <div class="settings-item-label">GNews APIキー <span style="color: var(--accent-rose);">必須</span></div>
+                <div class="settings-item-label">NewsData.io APIキー <span style="color: var(--text-muted);">推奨</span></div>
                 <div class="settings-item-desc">
-                    実際のニュース取得に使用します（無料: 100件/日）<br>
-                    <a href="https://gnews.io/" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">GNews.io で無料登録 →</a>
+                    実際のニュース取得に使用（無料: 200件/日）<br>
+                    <a href="https://newsdata.io/" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">NewsData.io で無料登録 →</a>
                 </div>
-                <input type="password" class="form-input" id="gnewsApiKey" placeholder="API Key..." style="margin-top: 8px;">
-                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-blue);" onclick="saveGNewsKey()">GNews APIキーを保存</button>
+                <input type="password" class="form-input" id="newsdataApiKey" placeholder="pub_..." style="margin-top: 8px;">
+                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-blue);" onclick="saveNewsDataKey()">NewsData APIキーを保存</button>
             </div>
             
             <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 12px; color: var(--text-muted);">
-                💡 <strong>両方のAPIキーが必要です</strong><br>
-                GNews: 実際のニュースを取得<br>
-                OpenAI: ニュースを要約・分析してAI日報を生成
+                💡 <strong>APIキーについて</strong><br>
+                • OpenAI: 必須（日報生成に使用）<br>
+                • NewsData.io: 推奨（高品質なニュース取得）<br>
+                • APIキーがなくてもGoogle News RSSで取得を試みます
             </div>
         </div>
         
@@ -867,7 +868,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.0.0';
+        const APP_VERSION = 'v3.1.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1838,14 +1839,14 @@
             showToast('OpenAI APIキーを保存しました ✓');
         }
         
-        async function saveGNewsKey() {
-            const apiKey = document.getElementById('gnewsApiKey').value.trim();
+        async function saveNewsDataKey() {
+            const apiKey = document.getElementById('newsdataApiKey').value.trim();
             if (!apiKey) {
-                showToast('GNews APIキーを入力してください');
+                showToast('NewsData APIキーを入力してください');
                 return;
             }
-            await dbPut('settings', { id: 'gnewsApiKey', key: apiKey });
-            showToast('GNews APIキーを保存しました ✓');
+            await dbPut('settings', { id: 'newsdataApiKey', key: apiKey });
+            showToast('NewsData APIキーを保存しました ✓');
         }
         
         async function loadApiKeys() {
@@ -1854,9 +1855,9 @@
                 document.getElementById('openaiApiKey').value = openaiData.key;
             }
             
-            const gnewsData = await dbGet('settings', 'gnewsApiKey');
-            if (gnewsData?.key) {
-                document.getElementById('gnewsApiKey').value = gnewsData.key;
+            const newsdataData = await dbGet('settings', 'newsdataApiKey');
+            if (newsdataData?.key) {
+                document.getElementById('newsdataApiKey').value = newsdataData.key;
             }
         }
         
@@ -1874,21 +1875,16 @@
             
             console.log(`=== 日報生成開始: ${targetDate} ===`);
             
-            // APIキーの確認
+            // OpenAI APIキーの確認（必須）
             const openaiKeyData = await dbGet('settings', 'openaiApiKey');
-            const gnewsKeyData = await dbGet('settings', 'gnewsApiKey');
-            
             if (!openaiKeyData?.key) {
                 showToast('設定からOpenAI APIキーを入力してください');
                 statusEl.textContent = 'OpenAI APIキーが未設定';
                 return;
             }
             
-            if (!gnewsKeyData?.key) {
-                showToast('設定からGNews APIキーを入力してください');
-                statusEl.textContent = 'GNews APIキーが未設定';
-                return;
-            }
+            // ニュースAPIキーの取得（任意）
+            const newsdataKeyData = await dbGet('settings', 'newsdataApiKey');
             
             // キャッシュ確認
             if (!forceRegenerate) {
@@ -1907,15 +1903,15 @@
                     ニュースを取得中...
                 </div>
             `;
-            statusEl.textContent = 'GNews APIでニュースを取得しています...';
+            statusEl.textContent = 'ニュースを取得しています...';
             
             try {
-                // Step 1: GNews APIで実際のニュースを取得
-                console.log('Step 1: GNews APIでニュース取得');
-                const newsArticles = await fetchRealNews(gnewsKeyData.key, newsKeywords);
+                // Step 1: ニュースを取得（複数ソース）
+                console.log('Step 1: ニュース取得');
+                const newsArticles = await fetchNewsMultiSource(newsdataKeyData?.key, newsKeywords, statusEl);
                 
                 if (newsArticles.length === 0) {
-                    throw new Error('ニュースを取得できませんでした。APIキーを確認してください。');
+                    throw new Error('ニュースを取得できませんでした。しばらく待ってから再試行してください。');
                 }
                 
                 console.log(`取得したニュース: ${newsArticles.length}件`);
@@ -1957,105 +1953,238 @@
         }
         
         // ==========================================
-        // GNews API でニュースを取得
+        // 複数ソースからニュースを取得
         // ==========================================
-        async function fetchRealNews(gnewsApiKey, keywords) {
+        async function fetchNewsMultiSource(newsdataApiKey, keywords, statusEl) {
             const allArticles = [];
-            const seenUrls = new Set();
+            const seenTitles = new Set();
             
-            console.log('=== GNews API ニュース取得開始 ===');
+            console.log('=== マルチソース ニュース取得開始 ===');
             console.log('キーワード:', keywords);
             
-            // 各キーワードでニュース検索
-            for (const keyword of keywords) {
-                try {
-                    console.log(`検索中: "${keyword}"`);
-                    
-                    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(keyword)}&lang=ja&country=jp&max=10&apikey=${gnewsApiKey}`;
-                    
-                    const response = await fetch(url, {
-                        signal: AbortSignal.timeout(15000)
-                    });
-                    
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.warn(`GNews API エラー (${keyword}):`, response.status, errorText);
-                        continue;
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data.articles && data.articles.length > 0) {
-                        console.log(`✓ "${keyword}": ${data.articles.length}件`);
-                        
-                        data.articles.forEach(article => {
-                            // 重複チェック
-                            if (!seenUrls.has(article.url)) {
-                                seenUrls.add(article.url);
-                                allArticles.push({
-                                    keyword: keyword,
-                                    title: article.title || '',
-                                    description: article.description || '',
-                                    content: article.content || article.description || '',
-                                    source: article.source?.name || '不明',
-                                    publishedAt: article.publishedAt,
-                                    url: article.url,
-                                    image: article.image
-                                });
-                            }
-                        });
-                    } else {
-                        console.warn(`△ "${keyword}": ニュースなし`);
-                    }
-                    
-                    // APIレート制限対策（1秒待機）
-                    await new Promise(r => setTimeout(r, 1000));
-                    
-                } catch (e) {
-                    console.error(`✗ "${keyword}" 取得失敗:`, e.message);
-                }
+            // ソース1: NewsData.io API（APIキーがある場合）
+            if (newsdataApiKey) {
+                statusEl.textContent = 'NewsData.io からニュースを取得中...';
+                const newsDataArticles = await fetchFromNewsDataIO(newsdataApiKey, keywords, seenTitles);
+                allArticles.push(...newsDataArticles);
+                console.log(`NewsData.io: ${newsDataArticles.length}件`);
             }
             
-            // 日本のトップニュースも取得
+            // ソース2: Google News RSS（常に試行）
+            if (allArticles.length < 20) {
+                statusEl.textContent = 'Google News RSS からニュースを取得中...';
+                const rssArticles = await fetchFromGoogleNewsRSS(keywords, seenTitles);
+                allArticles.push(...rssArticles);
+                console.log(`Google News RSS: ${rssArticles.length}件`);
+            }
+            
+            console.log(`=== ニュース取得完了: 合計${allArticles.length}件 ===`);
+            
+            // 最新順にソート
+            allArticles.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+            
+            return allArticles;
+        }
+        
+        // NewsData.io からニュース取得
+        async function fetchFromNewsDataIO(apiKey, keywords, seenTitles) {
+            const articles = [];
+            
+            // 日本のトップニュース
             try {
-                console.log('日本トップニュースを取得...');
-                const topNewsUrl = `https://gnews.io/api/v4/top-headlines?lang=ja&country=jp&max=10&apikey=${gnewsApiKey}`;
-                
-                const response = await fetch(topNewsUrl, {
-                    signal: AbortSignal.timeout(15000)
-                });
+                console.log('[NewsData.io] トップニュース取得中...');
+                const topUrl = `https://newsdata.io/api/1/latest?apikey=${apiKey}&language=ja&country=jp`;
+                const response = await fetch(topUrl, { signal: AbortSignal.timeout(15000) });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.articles) {
-                        console.log(`✓ トップニュース: ${data.articles.length}件`);
-                        data.articles.forEach(article => {
-                            if (!seenUrls.has(article.url)) {
-                                seenUrls.add(article.url);
-                                allArticles.push({
+                    if (data.results) {
+                        console.log(`✓ [NewsData.io] トップニュース: ${data.results.length}件`);
+                        data.results.forEach(item => {
+                            if (!seenTitles.has(item.title)) {
+                                seenTitles.add(item.title);
+                                articles.push({
                                     keyword: 'トップニュース',
-                                    title: article.title || '',
-                                    description: article.description || '',
-                                    content: article.content || article.description || '',
-                                    source: article.source?.name || '不明',
-                                    publishedAt: article.publishedAt,
-                                    url: article.url,
-                                    image: article.image
+                                    title: item.title || '',
+                                    description: item.description || '',
+                                    content: item.content || item.description || '',
+                                    source: item.source_name || item.source_id || '不明',
+                                    publishedAt: item.pubDate,
+                                    url: item.link
                                 });
                             }
                         });
                     }
+                } else {
+                    console.warn('[NewsData.io] トップニュース取得失敗:', response.status);
                 }
             } catch (e) {
-                console.warn('トップニュース取得失敗:', e.message);
+                console.warn('[NewsData.io] トップニュース取得エラー:', e.message);
             }
             
-            console.log(`=== ニュース取得完了: ${allArticles.length}件 ===`);
+            // 各キーワードで検索（最大3キーワード）
+            for (const keyword of keywords.slice(0, 3)) {
+                try {
+                    console.log(`[NewsData.io] "${keyword}" 検索中...`);
+                    const searchUrl = `https://newsdata.io/api/1/latest?apikey=${apiKey}&q=${encodeURIComponent(keyword)}&language=ja`;
+                    const response = await fetch(searchUrl, { signal: AbortSignal.timeout(15000) });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.results && data.results.length > 0) {
+                            console.log(`✓ [NewsData.io] "${keyword}": ${data.results.length}件`);
+                            data.results.slice(0, 5).forEach(item => {
+                                if (!seenTitles.has(item.title)) {
+                                    seenTitles.add(item.title);
+                                    articles.push({
+                                        keyword: keyword,
+                                        title: item.title || '',
+                                        description: item.description || '',
+                                        content: item.content || item.description || '',
+                                        source: item.source_name || item.source_id || '不明',
+                                        publishedAt: item.pubDate,
+                                        url: item.link
+                                    });
+                                }
+                            });
+                        }
+                    }
+                    await new Promise(r => setTimeout(r, 500));
+                } catch (e) {
+                    console.warn(`[NewsData.io] "${keyword}" 取得エラー:`, e.message);
+                }
+            }
             
-            // 最新順にソート
-            allArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+            return articles;
+        }
+        
+        // Google News RSS からニュース取得（フォールバック）
+        async function fetchFromGoogleNewsRSS(keywords, seenTitles) {
+            const articles = [];
             
-            return allArticles;
+            // RSS2JSONとAllOriginsの両方を試す
+            const proxyServices = [
+                {
+                    name: 'RSS2JSON',
+                    makeUrl: (rssUrl) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=10`,
+                    parse: (data) => data.status === 'ok' && data.items ? data.items : null
+                },
+                {
+                    name: 'AllOrigins',
+                    makeUrl: (rssUrl) => `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
+                    parse: (data) => data.contents ? parseRSSXML(data.contents) : null
+                }
+            ];
+            
+            // 日本のトップニュース
+            const topNewsUrl = 'https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja';
+            for (const proxy of proxyServices) {
+                try {
+                    console.log(`[${proxy.name}] トップニュース取得中...`);
+                    const response = await fetch(proxy.makeUrl(topNewsUrl), { signal: AbortSignal.timeout(12000) });
+                    const data = await response.json();
+                    const items = proxy.parse(data);
+                    
+                    if (items && items.length > 0) {
+                        console.log(`✓ [${proxy.name}] トップニュース: ${items.length}件`);
+                        items.slice(0, 10).forEach(item => {
+                            const title = cleanHtml(item.title || '');
+                            if (title && !seenTitles.has(title)) {
+                                seenTitles.add(title);
+                                articles.push({
+                                    keyword: 'トップニュース',
+                                    title: title,
+                                    description: cleanHtml(item.description || ''),
+                                    content: cleanHtml(item.description || ''),
+                                    source: extractSource(title),
+                                    publishedAt: item.pubDate || item.pubdate,
+                                    url: item.link
+                                });
+                            }
+                        });
+                        break;
+                    }
+                } catch (e) {
+                    console.warn(`[${proxy.name}] トップニュース取得失敗:`, e.message);
+                }
+            }
+            
+            // 各キーワードで検索
+            for (const keyword of keywords) {
+                const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
+                
+                for (const proxy of proxyServices) {
+                    try {
+                        console.log(`[${proxy.name}] "${keyword}" 検索中...`);
+                        const response = await fetch(proxy.makeUrl(rssUrl), { signal: AbortSignal.timeout(12000) });
+                        const data = await response.json();
+                        const items = proxy.parse(data);
+                        
+                        if (items && items.length > 0) {
+                            console.log(`✓ [${proxy.name}] "${keyword}": ${items.length}件`);
+                            items.slice(0, 5).forEach(item => {
+                                const title = cleanHtml(item.title || '');
+                                if (title && !seenTitles.has(title)) {
+                                    seenTitles.add(title);
+                                    articles.push({
+                                        keyword: keyword,
+                                        title: title,
+                                        description: cleanHtml(item.description || ''),
+                                        content: cleanHtml(item.description || ''),
+                                        source: extractSource(title),
+                                        publishedAt: item.pubDate || item.pubdate,
+                                        url: item.link
+                                    });
+                                }
+                            });
+                            break;
+                        }
+                    } catch (e) {
+                        console.warn(`[${proxy.name}] "${keyword}" 取得失敗:`, e.message);
+                    }
+                }
+                await new Promise(r => setTimeout(r, 300));
+            }
+            
+            return articles;
+        }
+        
+        // RSSのXMLをパース
+        function parseRSSXML(xmlString) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlString, 'text/xml');
+                const items = doc.querySelectorAll('item');
+                return Array.from(items).map(item => ({
+                    title: item.querySelector('title')?.textContent || '',
+                    description: item.querySelector('description')?.textContent || '',
+                    link: item.querySelector('link')?.textContent || '',
+                    pubDate: item.querySelector('pubDate')?.textContent || ''
+                }));
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        // HTMLタグを除去
+        function cleanHtml(html) {
+            return (html || '')
+                .replace(/<[^>]*>/g, '')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, 500);
+        }
+        
+        // ニュースソースを抽出
+        function extractSource(title) {
+            const match = title.match(/ - ([^-]+)$/);
+            return match ? match[1].trim() : 'Google News';
         }
         
         // ==========================================
