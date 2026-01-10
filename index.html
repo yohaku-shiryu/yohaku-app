@@ -817,7 +817,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v1.3.0';
+        const APP_VERSION = 'v1.3.1';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1796,10 +1796,15 @@
             const btn = document.getElementById('generatePaperBtn');
             const statusEl = document.getElementById('paperStatus');
             
+            console.log('日報生成開始...');
+            
             // APIキーを取得
             const apiKeyData = await dbGet('settings', 'openaiApiKey');
+            console.log('APIキー取得:', apiKeyData ? '成功' : '失敗');
+            
             if (!apiKeyData?.key) {
                 showToast('設定からAPIキーを入力してください');
+                statusEl.textContent = 'APIキーが設定されていません';
                 return;
             }
             
@@ -1807,6 +1812,7 @@
             const today = formatDate(new Date());
             const cachedPaper = await dbGet('notes', `paper-${today}`);
             if (cachedPaper?.content) {
+                console.log('キャッシュから表示');
                 showDailyPaper(cachedPaper.content, today);
                 return;
             }
@@ -1818,17 +1824,28 @@
             statusEl.textContent = 'ニュースを収集しています...';
             
             try {
-                // キーワードでニュースを検索（Google News RSS経由）
+                // キーワードでニュースを検索
+                console.log('ニュース取得開始... キーワード:', newsKeywords.slice(0, 5));
                 const newsItems = await fetchNewsForKeywords(newsKeywords.slice(0, 5));
+                console.log('取得したニュース数:', newsItems.length);
                 
                 if (newsItems.length === 0) {
-                    throw new Error('ニュースを取得できませんでした');
+                    // ニュースが取得できない場合、キーワードのみでAI生成
+                    console.log('ニュースなし、キーワードのみで生成');
+                    statusEl.textContent = 'キーワードから日報を生成しています...';
+                    const paperContent = await generatePaperWithoutNews(apiKeyData.key, newsKeywords);
+                    await dbPut('notes', { id: `paper-${today}`, content: paperContent, date: today });
+                    showDailyPaper(paperContent, today);
+                    statusEl.textContent = '今日の日報が生成されました';
+                    return;
                 }
                 
                 statusEl.textContent = 'AIが要約を生成しています...';
                 
                 // GPTで要約を生成
+                console.log('GPT呼び出し開始...');
                 const paperContent = await generatePaperWithGPT(apiKeyData.key, newsItems, newsKeywords);
+                console.log('GPT呼び出し成功');
                 
                 // キャッシュに保存
                 await dbPut('notes', { id: `paper-${today}`, content: paperContent, date: today });
@@ -1839,8 +1856,8 @@
                 
             } catch (error) {
                 console.error('Paper generation error:', error);
-                showToast('生成に失敗しました: ' + error.message);
-                statusEl.textContent = 'エラーが発生しました';
+                showToast('エラー: ' + error.message);
+                statusEl.textContent = 'エラー: ' + error.message;
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('loading');
@@ -1854,11 +1871,13 @@
             
             for (const keyword of keywords) {
                 try {
+                    console.log(`ニュース取得中: ${keyword}`);
                     const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
                     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=3`;
                     
                     const response = await fetch(apiUrl);
                     const data = await response.json();
+                    console.log(`${keyword} の結果:`, data.status, data.items?.length || 0);
                     
                     if (data.status === 'ok' && data.items) {
                         data.items.forEach(item => {
@@ -1870,13 +1889,76 @@
                                 date: item.pubDate
                             });
                         });
+                    } else {
+                        console.warn(`${keyword}: RSS2JSON エラー`, data.message || data);
                     }
                 } catch (e) {
-                    console.warn(`Failed to fetch news for ${keyword}:`, e);
+                    console.warn(`${keyword} 取得失敗:`, e);
                 }
             }
             
+            console.log('合計ニュース数:', allNews.length);
             return allNews;
+        }
+        
+        // ニュースなしでGPT生成（フォールバック）
+        async function generatePaperWithoutNews(apiKey, keywords) {
+            const prompt = `あなたは「余白日報」という個人向け新聞の編集者です。
+以下のキーワードに関する最新の動向や考察を、日報形式で作成してください。
+
+## 読者の関心キーワード
+${keywords.join('、')}
+
+## 読者プロフィール
+30代男性、テクノロジーとケア・アートに関心がある起業家
+
+## 出力形式（JSON）
+{
+  "headline": "今日の一言（20文字以内）",
+  "summary": "今日のテーマの概要（100文字程度）",
+  "sections": [
+    {
+      "title": "セクションタイトル",
+      "emoji": "絵文字1つ",
+      "content": "そのトピックの考察（150-200文字）",
+      "insight": "読者への示唆（50文字程度）"
+    }
+  ],
+  "closing": "締めの言葉（30文字程度）"
+}
+
+重要：必ず有効なJSONのみを出力。セクションは3個。`;
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.7,
+                    max_tokens: 1500
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                console.error('OpenAI API Error:', error);
+                throw new Error(error.error?.message || 'API呼び出しに失敗');
+            }
+            
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+            console.log('GPT Response:', content);
+            
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                throw new Error('JSONパースエラー');
+            }
+            
+            return JSON.parse(jsonMatch[0]);
         }
         
         // GPTで日報生成
