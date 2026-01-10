@@ -879,7 +879,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.3.0';
+        const APP_VERSION = 'v3.4.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1738,7 +1738,14 @@
             const data = await dbGet('habits', key);
             const newValue = !(data?.completed || false);
             await dbPut('habits', { id: key, completed: newValue });
-            if (period === 'morning') renderMorningHabits(); else renderEveningHabits();
+            
+            // 該当する習慣セクションを再描画
+            switch (period) {
+                case 'morning': await renderMorningHabits(); break;
+                case 'daytime': await renderDaytimeHabits(); break;
+                case 'evening': await renderEveningHabits(); break;
+                case 'night': await renderNightHabits(); break;
+            }
             renderStats();
             showToast(newValue ? '完了！' : '取り消しました');
         }
@@ -2280,8 +2287,10 @@ ${newsText}
 - ビジネスパーソンが1分で全体像を把握できる構成
 - 各ポイントは具体的なニュースに基づく
 
-### 3. トピックセクション（5-7セクション必須）
-各セクションは**実際のニュース記事**を元に以下の構成で**500-700文字**:
+### 3. トピックセクション（提供されたニュース全てをカバー）
+- **提供されたニュース記事を全て使い切る**こと（最低10セクション以上）
+- 同じカテゴリのニュースは1セクションにまとめてOK
+- 各セクションは**実際のニュース記事**を元に以下の構成で**400-600文字**:
 
 **【セクションタイトル】**
 ニュースの内容を反映した具体的なタイトル
@@ -2341,12 +2350,13 @@ ${newsText}
 
 ## ⚠️ 重要な制約
 1. **必ず有効なJSONのみ**を出力（説明文や前置きは不要）
-2. **セクションは5-7個**を必ず作成
+2. **提供されたニュースを全て使い切る**（最低10セクション以上）
 3. **各セクションは実際のニュースに基づく**こと
 4. 架空の情報を含めない
 5. セクションタイトルは「〇〇について」のような抽象的なものではなく、**具体的なニュース内容を反映**したものに
 6. 出典（メディア名）を必ず含める
-7. **source_url は必須**：各セクションに引用した記事のURLを必ず含める（提供されたURLをそのままコピー）`;
+7. **source_url は必須**：各セクションに引用した記事のURLを必ず含める（提供されたURLをそのままコピー）
+8. **ニュースの鮮度を重視**：本日のニュースを優先して使用する`;
 
             console.log('GPT-4o 呼び出し開始...');
             console.log('プロンプト文字数:', prompt.length);
@@ -2376,7 +2386,7 @@ ${newsText}
                         { role: 'user', content: prompt }
                     ],
                     temperature: 0.7,
-                    max_tokens: 6000
+                    max_tokens: 10000
                 })
             });
             
