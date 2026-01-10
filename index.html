@@ -452,6 +452,151 @@
         
         /* Theme indicator */
         .theme-indicator { font-size: 11px; color: var(--text-muted); margin-left: 8px; }
+        
+        /* Daily Paper */
+        .daily-paper-card { 
+            background: linear-gradient(145deg, #f5f0e8 0%, #ebe5d9 100%); 
+            border: 1px solid rgba(139, 90, 43, 0.2); 
+            border-radius: var(--radius-lg); 
+            padding: 20px; 
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+        }
+        [data-theme="dark"] .daily-paper-card {
+            background: linear-gradient(145deg, #2a2520 0%, #1f1a16 100%);
+            border-color: rgba(212, 165, 116, 0.2);
+        }
+        .paper-card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+        .paper-card-icon { font-size: 32px; }
+        .paper-card-title { font-family: var(--font-serif); font-size: 18px; color: var(--text-primary); font-weight: 500; }
+        .paper-card-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .paper-generate-btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(135deg, #8b5a2b 0%, #6b4423 100%); 
+            border: none; 
+            border-radius: var(--radius-md); 
+            color: #f5f0e8; 
+            font-family: var(--font-serif); 
+            font-size: 15px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .paper-generate-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .paper-generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .paper-generate-btn.loading { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        
+        /* Daily Paper Full View */
+        .daily-paper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f5f0;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            animation: paperIn 0.3s ease;
+        }
+        [data-theme="dark"] .daily-paper { background: #1a1714; }
+        @keyframes paperIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        
+        .paper-header { 
+            text-align: center; 
+            padding: 30px 20px 24px; 
+            border-bottom: 3px double #8b5a2b; 
+            margin-bottom: 24px; 
+        }
+        .paper-title { 
+            font-family: var(--font-serif); 
+            font-size: 36px; 
+            font-weight: 600; 
+            color: #2c1810; 
+            letter-spacing: 0.2em; 
+            margin-bottom: 8px; 
+        }
+        [data-theme="dark"] .paper-title { color: #f5f0e8; }
+        .paper-date { 
+            font-family: var(--font-display); 
+            font-size: 14px; 
+            color: #8b5a2b; 
+            margin-bottom: 8px; 
+        }
+        .paper-subtitle { 
+            font-family: var(--font-serif); 
+            font-size: 12px; 
+            color: #6b5a4a; 
+            font-style: italic; 
+        }
+        [data-theme="dark"] .paper-subtitle { color: #a89888; }
+        
+        .paper-content { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 0 10px; 
+        }
+        .paper-section { 
+            margin-bottom: 28px; 
+            padding-bottom: 20px; 
+            border-bottom: 1px solid rgba(139, 90, 43, 0.2); 
+        }
+        .paper-section:last-child { border-bottom: none; }
+        .paper-section-title { 
+            font-family: var(--font-serif); 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: #8b5a2b; 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .paper-section-content { 
+            font-family: var(--font-serif); 
+            font-size: 14px; 
+            line-height: 2; 
+            color: #2c1810; 
+            text-align: justify; 
+        }
+        [data-theme="dark"] .paper-section-content { color: #e8e0d8; }
+        .paper-headline { 
+            font-family: var(--font-serif); 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #2c1810; 
+            margin-bottom: 8px; 
+        }
+        [data-theme="dark"] .paper-headline { color: #f5f0e8; }
+        .paper-summary { 
+            font-size: 13px; 
+            color: #4a3a2a; 
+            margin-bottom: 16px; 
+            padding-left: 12px; 
+            border-left: 2px solid #8b5a2b; 
+        }
+        [data-theme="dark"] .paper-summary { color: #c8b8a8; }
+        
+        .paper-footer { 
+            text-align: center; 
+            padding: 24px 20px calc(var(--safe-bottom) + 24px); 
+        }
+        .paper-close-btn { 
+            padding: 12px 32px; 
+            background: transparent; 
+            border: 2px solid #8b5a2b; 
+            border-radius: var(--radius-md); 
+            color: #8b5a2b; 
+            font-family: var(--font-serif); 
+            font-size: 14px; 
+            cursor: pointer; 
+        }
+        .paper-close-btn:hover { background: rgba(139, 90, 43, 0.1); }
     </style>
 </head>
 <body>
@@ -525,6 +670,36 @@
             
             <!-- News View -->
             <div class="view" id="newsView">
+                <!-- 余白日報 -->
+                <div class="daily-paper" id="dailyPaper" style="display: none;">
+                    <div class="paper-header">
+                        <div class="paper-title">余白日報</div>
+                        <div class="paper-date" id="paperDate"></div>
+                        <div class="paper-subtitle">— 質量と余白の間で、今日を知る —</div>
+                    </div>
+                    <div class="paper-content" id="paperContent"></div>
+                    <div class="paper-footer">
+                        <button class="paper-close-btn" onclick="closeDailyPaper()">閉じる</button>
+                    </div>
+                </div>
+                
+                <!-- 日報生成ボタン -->
+                <div class="section">
+                    <div class="daily-paper-card" id="dailyPaperCard">
+                        <div class="paper-card-header">
+                            <span class="paper-card-icon">📰</span>
+                            <div>
+                                <div class="paper-card-title">今日の余白日報</div>
+                                <div class="paper-card-desc" id="paperStatus">AIが今日のニュースを要約します</div>
+                            </div>
+                        </div>
+                        <button class="paper-generate-btn" id="generatePaperBtn" onclick="generateDailyPaper()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            日報を生成
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="section">
                     <div class="section-header"><span class="section-title">ニュースキーワード</span></div>
                     <div class="keyword-tags" id="keywordTags"></div>
@@ -599,6 +774,16 @@
         <button class="btn-primary" onclick="saveSettings()">保存する</button>
         
         <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
+            <div class="settings-section-title">📰 余白日報（AI設定）</div>
+            <div class="settings-item">
+                <div class="settings-item-label">OpenAI APIキー</div>
+                <div class="settings-item-desc">ニュースの要約生成に使用します（キーは端末内に保存）</div>
+                <input type="password" class="form-input" id="openaiApiKey" placeholder="sk-..." style="margin-top: 8px;">
+                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-sage);" onclick="saveApiKey()">APIキーを保存</button>
+            </div>
+        </div>
+        
+        <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
             <div class="settings-section-title">🔄 アプリの更新</div>
             <div class="settings-item">
                 <div class="settings-item-label">最新版に更新</div>
@@ -632,7 +817,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v1.2.0';
+        const APP_VERSION = 'v1.3.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1559,11 +1744,12 @@
         function selectDate(day) { currentDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), day); closeCalendar(); renderAll(); }
 
         // Settings
-        function openSettings() {
+        async function openSettings() {
             document.getElementById('morningStart').value = settings.morningStart;
             document.getElementById('eveningStart').value = settings.eveningStart;
             document.getElementById('appVersion').textContent = APP_VERSION;
             document.getElementById('appLastUpdate').textContent = APP_LAST_UPDATE;
+            await loadApiKey();
             document.getElementById('settingsModal').classList.add('active');
         }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
@@ -1585,6 +1771,225 @@
                 settings.eveningStart = data.eveningStart || '20:00';
             }
             updateTimeRangeDisplay();
+        }
+        
+        // APIキー管理
+        async function saveApiKey() {
+            const apiKey = document.getElementById('openaiApiKey').value.trim();
+            if (!apiKey) {
+                showToast('APIキーを入力してください');
+                return;
+            }
+            await dbPut('settings', { id: 'openaiApiKey', key: apiKey });
+            showToast('APIキーを保存しました');
+        }
+        
+        async function loadApiKey() {
+            const data = await dbGet('settings', 'openaiApiKey');
+            if (data?.key) {
+                document.getElementById('openaiApiKey').value = data.key;
+            }
+        }
+        
+        // 余白日報生成
+        async function generateDailyPaper() {
+            const btn = document.getElementById('generatePaperBtn');
+            const statusEl = document.getElementById('paperStatus');
+            
+            // APIキーを取得
+            const apiKeyData = await dbGet('settings', 'openaiApiKey');
+            if (!apiKeyData?.key) {
+                showToast('設定からAPIキーを入力してください');
+                return;
+            }
+            
+            // 今日のキャッシュを確認
+            const today = formatDate(new Date());
+            const cachedPaper = await dbGet('notes', `paper-${today}`);
+            if (cachedPaper?.content) {
+                showDailyPaper(cachedPaper.content, today);
+                return;
+            }
+            
+            // 生成開始
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>生成中...';
+            statusEl.textContent = 'ニュースを収集しています...';
+            
+            try {
+                // キーワードでニュースを検索（Google News RSS経由）
+                const newsItems = await fetchNewsForKeywords(newsKeywords.slice(0, 5));
+                
+                if (newsItems.length === 0) {
+                    throw new Error('ニュースを取得できませんでした');
+                }
+                
+                statusEl.textContent = 'AIが要約を生成しています...';
+                
+                // GPTで要約を生成
+                const paperContent = await generatePaperWithGPT(apiKeyData.key, newsItems, newsKeywords);
+                
+                // キャッシュに保存
+                await dbPut('notes', { id: `paper-${today}`, content: paperContent, date: today });
+                
+                // 表示
+                showDailyPaper(paperContent, today);
+                statusEl.textContent = '今日の日報が生成されました';
+                
+            } catch (error) {
+                console.error('Paper generation error:', error);
+                showToast('生成に失敗しました: ' + error.message);
+                statusEl.textContent = 'エラーが発生しました';
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>日報を生成';
+            }
+        }
+        
+        // ニュース取得（RSS2JSON経由）
+        async function fetchNewsForKeywords(keywords) {
+            const allNews = [];
+            
+            for (const keyword of keywords) {
+                try {
+                    const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
+                    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=3`;
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    
+                    if (data.status === 'ok' && data.items) {
+                        data.items.forEach(item => {
+                            allNews.push({
+                                keyword,
+                                title: item.title,
+                                description: item.description?.replace(/<[^>]*>/g, '').slice(0, 200) || '',
+                                source: item.author || 'Google News',
+                                date: item.pubDate
+                            });
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`Failed to fetch news for ${keyword}:`, e);
+                }
+            }
+            
+            return allNews;
+        }
+        
+        // GPTで日報生成
+        async function generatePaperWithGPT(apiKey, newsItems, keywords) {
+            const newsText = newsItems.map(n => 
+                `【${n.keyword}】${n.title}\n${n.description}`
+            ).join('\n\n');
+            
+            const prompt = `あなたは「余白日報」という個人向け新聞の編集者です。
+以下のニュース項目を元に、読者（30代男性、テクノロジーとケア・アートに関心がある起業家）向けの日報を作成してください。
+
+## 読者の関心キーワード
+${keywords.join('、')}
+
+## 今日のニュース
+${newsText}
+
+## 出力形式（JSON）
+以下のJSON形式で出力してください：
+{
+  "headline": "今日の一言（20文字以内の印象的なフレーズ）",
+  "summary": "今日のニュースの全体像（100文字程度）",
+  "sections": [
+    {
+      "title": "セクションタイトル（キーワードを含む）",
+      "emoji": "関連する絵文字1つ",
+      "content": "そのトピックの要約と考察（150-200文字）",
+      "insight": "読者への示唆や問いかけ（50文字程度）"
+    }
+  ],
+  "closing": "締めの言葉（余白を大切にする哲学に基づく、30文字程度）"
+}
+
+重要：
+- 必ず有効なJSONのみを出力してください
+- セクションは3-4個程度
+- 批評的ではなく、建設的な視点で
+- 「余白」の哲学（効率性から外れた価値）を意識して`;
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API呼び出しに失敗しました');
+            }
+            
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+            
+            // JSONをパース
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                throw new Error('有効なJSONが返されませんでした');
+            }
+            
+            return JSON.parse(jsonMatch[0]);
+        }
+        
+        // 日報を表示
+        function showDailyPaper(content, date) {
+            const paper = document.getElementById('dailyPaper');
+            const paperDate = document.getElementById('paperDate');
+            const paperContent = document.getElementById('paperContent');
+            
+            const dateObj = new Date(date);
+            const weekday = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
+            paperDate.textContent = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日（${weekday}）`;
+            
+            let html = `
+                <div class="paper-section">
+                    <div class="paper-headline">${content.headline}</div>
+                    <div class="paper-summary">${content.summary}</div>
+                </div>
+            `;
+            
+            content.sections.forEach(section => {
+                html += `
+                    <div class="paper-section">
+                        <div class="paper-section-title">${section.emoji} ${section.title}</div>
+                        <div class="paper-section-content">${section.content}</div>
+                        ${section.insight ? `<div class="paper-summary" style="margin-top: 12px; font-style: italic;">💭 ${section.insight}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="paper-section" style="text-align: center; border-bottom: none;">
+                    <div style="font-family: var(--font-serif); font-size: 13px; color: #8b5a2b; font-style: italic;">
+                        ${content.closing}
+                    </div>
+                </div>
+            `;
+            
+            paperContent.innerHTML = html;
+            paper.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDailyPaper() {
+            document.getElementById('dailyPaper').style.display = 'none';
+            document.body.style.overflow = '';
         }
         
         // アプリの強制更新
