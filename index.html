@@ -868,7 +868,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.1.0';
+        const APP_VERSION = 'v3.2.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -2315,7 +2315,8 @@ ${newsText}
       "news_summary": "ニュースファクト（200文字・出典明記）",
       "analysis": "背景・文脈（200文字）",
       "insight": "読者への示唆（200文字）",
-      "source": "記事の出典メディア名"
+      "source": "記事の出典メディア名",
+      "source_url": "引用した記事のURL（必須・提供されたURLをそのまま使用）"
     }
   ],
   "question_of_day": "今日の問い（60-100文字）",
@@ -2332,7 +2333,8 @@ ${newsText}
 3. **各セクションは実際のニュースに基づく**こと
 4. 架空の情報を含めない
 5. セクションタイトルは「〇〇について」のような抽象的なものではなく、**具体的なニュース内容を反映**したものに
-6. 出典（メディア名）を必ず含める`;
+6. 出典（メディア名）を必ず含める
+7. **source_url は必須**：各セクションに引用した記事のURLを必ず含める（提供されたURLをそのままコピー）`;
 
             console.log('GPT-4o 呼び出し開始...');
             console.log('プロンプト文字数:', prompt.length);
@@ -2355,8 +2357,9 @@ ${newsText}
 1. 提供されたニュース記事の内容のみを使用する
 2. 架空の情報や想像で補完しない
 3. 各セクションは必ず実際のニュースに基づく
-4. 出典を明記する
-5. 必ずJSON形式のみで出力する（説明文不要）`
+4. 出典（メディア名）とsource_url（記事URL）を必ず含める
+5. source_urlは提供された記事のURLをそのままコピーする
+6. 必ずJSON形式のみで出力する（説明文不要）`
                         },
                         { role: 'user', content: prompt }
                     ],
@@ -2443,12 +2446,12 @@ ${newsText}
                 const analysis = section.analysis || section.content || '';
                 const insight = section.insight || '';
                 const source = section.source || '';
+                const sourceUrl = section.source_url || '';
                 
                 html += `
                     <div class="paper-section" style="border-left: 3px solid rgba(139,90,43,0.3); padding-left: 16px; margin-left: 8px;">
                         <div class="paper-section-title" style="font-size: 17px; margin-bottom: 16px;">
                             ${section.emoji || '📌'} ${section.title}
-                            ${source ? `<span style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 8px;">— ${source}</span>` : ''}
                         </div>
                         
                         ${newsSum ? `
@@ -2471,6 +2474,19 @@ ${newsText}
                                 <div style="font-size: 13px; line-height: 1.8; font-style: italic;">${insight}</div>
                             </div>
                         ` : ''}
+                        
+                        <!-- 引用元リンク -->
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-subtle); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-size: 10px; color: var(--text-muted);">📎 出典:</span>
+                            ${source ? `<span style="font-size: 11px; color: var(--text-secondary);">${source}</span>` : ''}
+                            ${sourceUrl ? `
+                                <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" 
+                                   style="font-size: 11px; color: var(--accent-blue); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--accent-blue-dim); border-radius: 4px;">
+                                    🔗 元記事を確認
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                </a>
+                            ` : '<span style="font-size: 10px; color: var(--text-muted);">リンクなし</span>'}
+                        </div>
                     </div>
                 `;
             });
