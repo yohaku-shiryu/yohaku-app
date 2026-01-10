@@ -593,10 +593,33 @@
     <!-- Modals -->
     <div class="modal-overlay" id="calendarModal"><div class="modal"><div class="modal-header"><span class="modal-title">日付を選択</span><button class="modal-close" onclick="closeCalendar()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body"><div class="calendar"><div class="calendar-nav"><button onclick="prevMonth()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><span class="calendar-month" id="calendarMonth"></span><button onclick="nextMonth()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button></div><div class="calendar-weekdays"><div class="calendar-weekday">日</div><div class="calendar-weekday">月</div><div class="calendar-weekday">火</div><div class="calendar-weekday">水</div><div class="calendar-weekday">木</div><div class="calendar-weekday">金</div><div class="calendar-weekday">土</div></div><div class="calendar-days" id="calendarDays"></div></div></div></div></div>
     
-    <div class="modal-overlay" id="settingsModal"><div class="modal"><div class="modal-header"><span class="modal-title">ルーティン時間設定</span><button class="modal-close" onclick="closeSettings()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body">
-        <div class="settings-section"><div class="settings-section-title">🌅 朝のルーティン開始時刻</div><div class="settings-item"><div class="settings-item-label">開始時刻を設定</div><div class="settings-item-desc">この時刻から朝ルーティンが始まります</div><div class="time-input-group"><input type="time" class="time-input" id="morningStart" value="06:00"></div></div></div>
-        <div class="settings-section"><div class="settings-section-title">🌙 夜のルーティン開始時刻</div><div class="settings-item"><div class="settings-item-label">開始時刻を設定</div><div class="settings-item-desc">この時刻から夜ルーティンが始まります</div><div class="time-input-group"><input type="time" class="time-input" id="eveningStart" value="21:00"></div></div></div>
+    <div class="modal-overlay" id="settingsModal"><div class="modal"><div class="modal-header"><span class="modal-title">設定</span><button class="modal-close" onclick="closeSettings()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body">
+        <div class="settings-section"><div class="settings-section-title">🌅 朝のルーティン開始時刻</div><div class="settings-item"><div class="settings-item-label">開始時刻を設定</div><div class="settings-item-desc">この時刻から朝ルーティンが始まります</div><div class="time-input-group"><input type="time" class="time-input" id="morningStart" value="07:00"></div></div></div>
+        <div class="settings-section"><div class="settings-section-title">🌙 夜のルーティン開始時刻</div><div class="settings-item"><div class="settings-item-label">開始時刻を設定</div><div class="settings-item-desc">この時刻から夜ルーティンが始まります</div><div class="time-input-group"><input type="time" class="time-input" id="eveningStart" value="20:00"></div></div></div>
         <button class="btn-primary" onclick="saveSettings()">保存する</button>
+        
+        <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
+            <div class="settings-section-title">🔄 アプリの更新</div>
+            <div class="settings-item">
+                <div class="settings-item-label">最新版に更新</div>
+                <div class="settings-item-desc">ホーム画面に追加している場合、更新が反映されないことがあります</div>
+                <button class="btn-primary" style="margin-top: 12px; background: var(--accent-blue);" onclick="forceUpdateApp()">アプリを更新する</button>
+            </div>
+        </div>
+        
+        <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
+            <div class="settings-section-title">ℹ️ アプリ情報</div>
+            <div class="settings-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="settings-item-label">バージョン</span>
+                    <span style="color: var(--text-muted); font-family: var(--font-display);" id="appVersion">v1.2.0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span class="settings-item-label">最終更新</span>
+                    <span style="color: var(--text-muted); font-size: 12px;" id="appLastUpdate">2026-01-10</span>
+                </div>
+            </div>
+        </div>
     </div></div></div>
     
     <div class="modal-overlay" id="addBookModal"><div class="modal"><div class="modal-header"><span class="modal-title">本を追加</span><button class="modal-close" onclick="closeAddBookModal()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="modal-body"><div class="form-group"><label class="form-label">タイトル</label><input type="text" class="form-input" id="bookTitleInput" placeholder="本のタイトル"></div><div class="form-group"><label class="form-label">著者</label><input type="text" class="form-input" id="bookAuthorInput" placeholder="著者名"></div><button class="btn-primary" onclick="addCustomBook()">追加する</button></div></div></div>
@@ -606,6 +629,12 @@
     <div class="toast" id="toast">保存しました</div>
 
     <script>
+        // ============================================
+        // APP VERSION
+        // ============================================
+        const APP_VERSION = 'v1.2.0';
+        const APP_LAST_UPDATE = '2026-01-10';
+        
         // ============================================
         // DATA
         // ============================================
@@ -1533,6 +1562,8 @@
         function openSettings() {
             document.getElementById('morningStart').value = settings.morningStart;
             document.getElementById('eveningStart').value = settings.eveningStart;
+            document.getElementById('appVersion').textContent = APP_VERSION;
+            document.getElementById('appLastUpdate').textContent = APP_LAST_UPDATE;
             document.getElementById('settingsModal').classList.add('active');
         }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
@@ -1550,10 +1581,45 @@
         async function loadSettings() {
             const data = await dbGet('settings', 'routineTimes');
             if (data) {
-                settings.morningStart = data.morningStart || '06:00';
-                settings.eveningStart = data.eveningStart || '21:00';
+                settings.morningStart = data.morningStart || '07:00';
+                settings.eveningStart = data.eveningStart || '20:00';
             }
             updateTimeRangeDisplay();
+        }
+        
+        // アプリの強制更新
+        async function forceUpdateApp() {
+            showToast('更新を確認中...');
+            
+            try {
+                // Service Workerのキャッシュをクリア
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+                
+                // Service Workerを更新
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.update();
+                    }
+                }
+                
+                // ハードリロード（キャッシュを無視）
+                showToast('更新しています...');
+                setTimeout(() => {
+                    // URLにタイムスタンプを追加してキャッシュを回避
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('_refresh', Date.now());
+                    window.location.href = url.toString();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Update error:', error);
+                // フォールバック: 通常のリロード
+                window.location.reload(true);
+            }
         }
 
         // Add Book
