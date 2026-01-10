@@ -850,7 +850,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v2.0.0';
+        const APP_VERSION = 'v2.1.0';
         const APP_LAST_UPDATE = '2026-01-10';
         
         // ============================================
@@ -1907,108 +1907,149 @@
             await generateDailyPaper(true);
         }
         
-        // ニュース取得（複数ソース・リトライ対応）
+        // ニュース取得（複数プロキシ・リトライ対応）
         async function fetchNewsForKeywords(keywords) {
             const allNews = [];
-            const failedKeywords = [];
+            
+            // RSS2JSONとAllOriginsの両方を試す
+            const proxyServices = [
+                {
+                    name: 'RSS2JSON',
+                    makeUrl: (rssUrl) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=10`,
+                    parseResponse: (data) => {
+                        if (data.status === 'ok' && data.items) return data.items;
+                        return null;
+                    }
+                },
+                {
+                    name: 'AllOrigins',
+                    makeUrl: (rssUrl) => `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
+                    parseResponse: (data) => {
+                        if (!data.contents) return null;
+                        return parseRSSXML(data.contents);
+                    }
+                }
+            ];
             
             // 各キーワードで取得
             for (const keyword of keywords) {
                 let success = false;
                 
-                // RSS2JSON APIで取得を試みる
-                try {
-                    console.log(`ニュース取得中: ${keyword}`);
-                    
-                    const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
-                    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=8`;
-                    
-                    const response = await fetch(apiUrl, { 
-                        signal: AbortSignal.timeout(10000) // 10秒タイムアウト
-                    });
-                    const data = await response.json();
-                    
-                    if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        console.log(`✓ ${keyword}: ${data.items.length}件`);
-                        
-                        data.items.forEach(item => {
-                            const cleanDesc = cleanHtml(item.description || '');
-                            const cleanTitle = cleanHtml(item.title || '');
-                            
-                            // 重複チェック
-                            if (!allNews.some(n => n.title === cleanTitle)) {
-                                allNews.push({
-                                    keyword,
-                                    title: cleanTitle,
-                                    description: cleanDesc,
-                                    source: item.author || extractSource(cleanTitle),
-                                    date: item.pubDate,
-                                    link: item.link
-                                });
-                            }
-                        });
-                        success = true;
-                    } else {
-                        console.warn(`△ ${keyword}: ニュースなし (${data.message || data.status})`);
-                    }
-                } catch (e) {
-                    console.warn(`✗ ${keyword} 取得失敗:`, e.message);
-                }
+                const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ja&gl=JP&ceid=JP:ja`;
                 
-                if (!success) {
-                    failedKeywords.push(keyword);
-                }
-                
-                // APIレート制限対策
-                await new Promise(r => setTimeout(r, 300));
-            }
-            
-            // 失敗したキーワードがあれば別の方法でリトライ
-            if (failedKeywords.length > 0 && allNews.length < 5) {
-                console.log('代替取得を試行:', failedKeywords);
-                for (const keyword of failedKeywords.slice(0, 3)) {
+                // 各プロキシを順に試す
+                for (const proxy of proxyServices) {
+                    if (success) break;
+                    
                     try {
-                        // トップニュースRSSを試す
-                        const topNewsUrl = `https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja`;
-                        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(topNewsUrl)}&count=5`;
+                        console.log(`[${proxy.name}] ${keyword} 取得中...`);
                         
-                        const response = await fetch(apiUrl, { signal: AbortSignal.timeout(8000) });
+                        const response = await fetch(proxy.makeUrl(rssUrl), { 
+                            signal: AbortSignal.timeout(12000)
+                        });
                         const data = await response.json();
+                        const items = proxy.parseResponse(data);
                         
-                        if (data.status === 'ok' && data.items) {
-                            // キーワードに関連するニュースをフィルタ
-                            const related = data.items.filter(item => 
-                                item.title?.toLowerCase().includes(keyword.toLowerCase()) ||
-                                item.description?.toLowerCase().includes(keyword.toLowerCase())
-                            );
+                        if (items && items.length > 0) {
+                            console.log(`✓ [${proxy.name}] ${keyword}: ${items.length}件`);
                             
-                            related.forEach(item => {
+                            items.forEach(item => {
                                 const cleanTitle = cleanHtml(item.title || '');
-                                if (!allNews.some(n => n.title === cleanTitle)) {
+                                const cleanDesc = cleanHtml(item.description || item.content || '');
+                                
+                                // 重複チェック
+                                if (cleanTitle && !allNews.some(n => n.title === cleanTitle)) {
                                     allNews.push({
                                         keyword,
                                         title: cleanTitle,
-                                        description: cleanHtml(item.description || ''),
-                                        source: extractSource(cleanTitle),
-                                        date: item.pubDate,
-                                        link: item.link
+                                        description: cleanDesc,
+                                        source: item.author || item.source || extractSource(cleanTitle),
+                                        date: item.pubDate || item.pubdate || new Date().toISOString(),
+                                        link: item.link || item.url
                                     });
                                 }
                             });
+                            success = true;
                         }
                     } catch (e) {
-                        console.warn('代替取得失敗:', e.message);
+                        console.warn(`✗ [${proxy.name}] ${keyword} 失敗:`, e.message);
                     }
-                    await new Promise(r => setTimeout(r, 200));
+                }
+                
+                if (!success) {
+                    console.warn(`△ ${keyword}: 全プロキシ失敗`);
+                }
+                
+                // レート制限対策
+                await new Promise(r => setTimeout(r, 400));
+            }
+            
+            // 日本のトップニュースも取得（追加コンテンツ）
+            if (allNews.length < 15) {
+                try {
+                    console.log('トップニュース取得中...');
+                    const topNewsUrl = `https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja`;
+                    
+                    for (const proxy of proxyServices) {
+                        try {
+                            const response = await fetch(proxy.makeUrl(topNewsUrl), { 
+                                signal: AbortSignal.timeout(10000) 
+                            });
+                            const data = await response.json();
+                            const items = proxy.parseResponse(data);
+                            
+                            if (items && items.length > 0) {
+                                console.log(`✓ トップニュース: ${items.length}件`);
+                                items.slice(0, 5).forEach(item => {
+                                    const cleanTitle = cleanHtml(item.title || '');
+                                    if (cleanTitle && !allNews.some(n => n.title === cleanTitle)) {
+                                        allNews.push({
+                                            keyword: '日本トップニュース',
+                                            title: cleanTitle,
+                                            description: cleanHtml(item.description || item.content || ''),
+                                            source: extractSource(cleanTitle),
+                                            date: item.pubDate || item.pubdate,
+                                            link: item.link || item.url
+                                        });
+                                    }
+                                });
+                                break;
+                            }
+                        } catch (e) {
+                            console.warn(`トップニュース [${proxy.name}] 失敗`);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('トップニュース取得失敗:', e.message);
                 }
             }
             
             console.log(`=== ニュース取得完了: ${allNews.length}件 ===`);
             if (allNews.length > 0) {
-                console.log('サンプル:', allNews.slice(0, 3).map(n => n.title));
+                console.log('サンプル:', allNews.slice(0, 5).map(n => `[${n.keyword}] ${n.title.slice(0, 40)}...`));
             }
             
             return allNews;
+        }
+        
+        // RSSのXMLをパース
+        function parseRSSXML(xmlString) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlString, 'text/xml');
+                const items = doc.querySelectorAll('item');
+                
+                return Array.from(items).map(item => ({
+                    title: item.querySelector('title')?.textContent || '',
+                    description: item.querySelector('description')?.textContent || '',
+                    link: item.querySelector('link')?.textContent || '',
+                    pubDate: item.querySelector('pubDate')?.textContent || '',
+                    source: item.querySelector('source')?.textContent || ''
+                }));
+            } catch (e) {
+                console.error('XML parse error:', e);
+                return null;
+            }
         }
         
         // HTMLタグを除去
