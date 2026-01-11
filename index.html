@@ -132,6 +132,36 @@
         .time-period { font-size: 14px; color: var(--text-muted); margin-top: 8px; padding: 6px 16px; display: inline-block; border-radius: 20px; }
         .time-period.morning { background: var(--accent-gold-dim); color: var(--accent-gold); }
         .time-period.evening { background: var(--accent-blue-dim); color: var(--accent-blue); }
+        .time-mindset { 
+            margin-top: 16px; 
+            padding: 16px 20px; 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: var(--radius-lg); 
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        .time-mindset-title { 
+            font-weight: 600; 
+            color: var(--text-primary); 
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .time-mindset-list { margin: 0; padding-left: 16px; }
+        .time-mindset-list li { margin-bottom: 4px; }
+        .time-mindset-list li:last-child { margin-bottom: 0; }
+        .time-mindset-tip { 
+            margin-top: 10px; 
+            padding: 10px 12px; 
+            background: var(--accent-gold-dim); 
+            border-radius: var(--radius-md); 
+            font-size: 12px;
+            color: var(--accent-gold);
+        }
 
         /* Quote Card */
         .quote-card { 
@@ -418,6 +448,68 @@
         .plan-milestone { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
         .plan-milestone-dot { width: 8px; height: 8px; background: var(--accent-gold); border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
         .plan-milestone-text { font-size: 13px; color: var(--text-secondary); }
+        
+        /* SMART Goal Accordion */
+        .smart-goal-item { 
+            background: var(--bg-secondary); 
+            border-radius: var(--radius-md); 
+            margin-bottom: 8px; 
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s ease;
+        }
+        .smart-goal-item:hover { border-color: var(--border-medium); }
+        .smart-goal-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 14px 16px; 
+            cursor: pointer;
+            user-select: none;
+        }
+        .smart-goal-dot { 
+            width: 8px; 
+            height: 8px; 
+            background: var(--accent-gold); 
+            border-radius: 50%; 
+            flex-shrink: 0; 
+        }
+        .smart-goal-title { 
+            flex: 1; 
+            font-size: 13px; 
+            color: var(--text-secondary); 
+            line-height: 1.5;
+        }
+        .smart-goal-toggle { 
+            width: 20px; 
+            height: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+        .smart-goal-item.open .smart-goal-toggle { transform: rotate(180deg); }
+        .smart-goal-details { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.3s ease;
+        }
+        .smart-goal-item.open .smart-goal-details { max-height: 500px; }
+        .smart-goal-details-inner { 
+            padding: 0 16px 16px 36px; 
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 0;
+        }
+        .smart-goal-details-list { 
+            margin: 12px 0 0 0; 
+            padding-left: 16px; 
+            font-size: 12px; 
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+        .smart-goal-details-list li { margin-bottom: 4px; }
+        .smart-goal-details-list li:last-child { margin-bottom: 0; }
         .plan-quarter { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
         .plan-quarter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .plan-quarter-name { font-weight: 500; color: var(--text-primary); }
@@ -656,12 +748,12 @@
                 <div class="time-section">
                     <div class="current-time" id="currentTime">00:00</div>
                     <div class="time-period" id="timePeriod"></div>
+                    <div class="time-mindset" id="timeMindset"></div>
                 </div>
                 <div class="quote-card"><p class="quote-text" id="dailyQuote"></p><p class="quote-source">— 質量と余白の間で</p></div>
                 <div class="month-card">
                     <div class="month-card-header">
                         <div><div class="month-label">今月のテーマ</div><div class="month-theme" id="monthTheme">始動</div></div>
-                        <div class="month-revenue"><div class="month-revenue-label">目標月商</div><div class="month-revenue-value" id="monthRevenue">¥20万</div></div>
                     </div>
                     <p class="month-quote" id="monthQuote"></p>
                 </div>
@@ -879,8 +971,8 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.6.1';
-        const APP_LAST_UPDATE = '2026-01-10';
+        const APP_VERSION = 'v3.7.0';
+        const APP_LAST_UPDATE = '2026-01-11';
         
         // ============================================
         // DATA
@@ -1006,10 +1098,26 @@
                     { q: 'Q4', period: '10-12月', revenue: '70→100万', cumulative: '500万', events: '写真展、スイス、PxDT下期評価' }
                 ],
                 smartGoals: {
-                    business: ['PxDT：昇格（6月評価）、年収900万円達成', 'HERALBONY：月額8万円安定、年間100万円', 'yohaku：12月に月商100万円達成', 'コーチング資格：9月取得'],
-                    skill: ['MBA科目：年間12科目修了', '読書：57冊（月4-5冊）', '美術展：36回（月3回）'],
-                    artist: ['フィルム写真展：11月開催', 'ドラム：基礎習得、スタジオ練習週2回'],
-                    life: ['乃木坂引越し：4月', '体重60kg維持', 'スイス渡航：12月']
+                    business: [
+                        { title: 'PxDT：昇格（6月評価）、年収900万円達成', details: ['上期評価でA評価を獲得する', '新規プロジェクト2件以上リード', '部門横断の改善提案を月1件以上', '週次1on1で進捗と課題を共有'] },
+                        { title: 'HERALBONY：月額8万円安定、年間100万円', details: ['月2件の新規案件獲得', '既存クライアントのアップセル提案', 'ポートフォリオサイト更新（四半期ごと）', 'SNS発信を週3回継続'] },
+                        { title: 'yohaku：12月に月商100万円達成', details: ['Q1: 20→30万（既存顧客深耕）', 'Q2: 35→50万（紹介経由の新規開拓）', 'Q3: 50→60万（コーチング開始）', 'Q4: 70→100万（高単価メニュー投入）'] },
+                        { title: 'コーチング資格：9月取得', details: ['1-3月：研修プログラム受講開始', '4-6月：実践セッション50時間達成', '7-8月：認定試験対策', '9月：認定試験受験・合格'] }
+                    ],
+                    skill: [
+                        { title: 'MBA科目：年間12科目修了', details: ['毎月1科目ペースで履修', '平日夜2時間を学習時間に確保', 'ケーススタディは週末にまとめて', '同期との勉強会を月1回開催'] },
+                        { title: '読書：57冊（月4-5冊）', details: ['朝の15-20分を読書時間に固定', '月間読書計画を月初に立てる', '読んだ本は必ずメモを残す', 'ジャンルバランス：ビジネス2、教養2、文学1'] },
+                        { title: '美術展：36回（月3回）', details: ['週末に1-2回の美術館訪問', '平日夜のギャラリー巡りを月1回', '感想をInstagramで発信', '気に入った作品は写真で記録'] }
+                    ],
+                    artist: [
+                        { title: 'フィルム写真展：11月開催', details: ['1-3月：コンセプト・テーマ決定', '4-6月：撮影期間（週末中心）', '7-9月：セレクション・プリント制作', '10月：会場準備・DM作成', '11月：展示開催・在廊'] },
+                        { title: 'ドラム：基礎習得、スタジオ練習週2回', details: ['基礎ルーディメンツ習得', 'メトロノーム練習を毎日15分', '週2回のスタジオ予約を固定', '月1回のレッスン受講'] }
+                    ],
+                    life: [
+                        { title: '乃木坂引越し：4月', details: ['1-2月：物件探し・内見', '3月：契約・引越し準備', '4月：引越し実行・新生活スタート', '通勤時間短縮で生産性向上'] },
+                        { title: '体重60kg維持', details: ['毎朝の体重測定・記録', '14時間ファスティング継続', '週3回の筋トレ（月水金）', '歩数8000歩/日を目標'] },
+                        { title: 'スイス渡航：12月', details: ['航空券・宿泊の早期予約（6月）', '旅程プラン作成', '写真撮影計画（フィルム多めに）', '現地でしか見られないアートをリサーチ'] }
+                    ]
                 }
             },
             2027: {
@@ -1023,10 +1131,26 @@
                     { q: 'Q4', period: '10-12月', revenue: '90→100万', cumulative: '800万', events: '写真展、yohaku App企画開始' }
                 ],
                 smartGoals: {
-                    business: ['PxDT：年収1,100万円', 'yohaku：月商100万円安定化', 'コーチング顧客：月5名継続', '講演：年8回'],
-                    skill: ['MBA：全科目修了', '読書：60冊', '美術展：36回'],
-                    artist: ['写真展：第2回開催', 'ドラム：初ライブ出演', 'ピアノ：基礎曲3曲習得'],
-                    life: ['バイク免許：取得', '海外旅行：ヨーロッパ']
+                    business: [
+                        { title: 'PxDT：年収1,100万円', details: ['上半期・下半期ともにA評価維持', '新規事業領域でのリーダーシップ発揮', 'メンター制度でジュニア育成'] },
+                        { title: 'yohaku：月商100万円安定化', details: ['リピート率80%以上を維持', '単価アップ施策の実施', 'サービスメニューの標準化'] },
+                        { title: 'コーチング顧客：月5名継続', details: ['既存顧客からの紹介を促進', 'SNSでの発信強化', '成果事例のドキュメント化'] },
+                        { title: '講演：年8回', details: ['業界カンファレンスへの登壇', '企業研修の講師依頼受諾', 'オンラインセミナー開催'] }
+                    ],
+                    skill: [
+                        { title: 'MBA：全科目修了', details: ['残り科目を計画的に履修', '卒業論文のテーマ決定', '同期とのネットワーク強化'] },
+                        { title: '読書：60冊', details: ['月5冊ペースを維持', '専門性の深い書籍にチャレンジ', '読書会への参加'] },
+                        { title: '美術展：36回', details: ['国際アートフェア訪問', '海外の美術館を1つ以上訪問', 'アーティストとの交流'] }
+                    ],
+                    artist: [
+                        { title: '写真展：第2回開催', details: ['新しいテーマでの挑戦', '前回より大きな会場で開催', 'アーティストコラボレーション'] },
+                        { title: 'ドラム：初ライブ出演', details: ['バンドメンバー探し', '月2回のスタジオ練習', 'ライブハウスへの出演'] },
+                        { title: 'ピアノ：基礎曲3曲習得', details: ['週1回のレッスン', '毎日15分の練習', '発表会への参加'] }
+                    ],
+                    life: [
+                        { title: 'バイク免許：取得', details: ['教習所通い（3-4月）', '免許取得後のバイク選び', '安全運転講習受講'] },
+                        { title: '海外旅行：ヨーロッパ', details: ['目的地：美術館巡り中心', '現地での写真撮影計画', '2週間程度の長期滞在'] }
+                    ]
                 }
             },
             2028: {
@@ -1040,10 +1164,23 @@
                     { q: 'Q4', period: '10-12月', revenue: '310→330万', cumulative: '3,580万', events: '第3回写真展' }
                 ],
                 smartGoals: {
-                    business: ['yohaku：月商300万円達成', 'yohaku App：ローンチ、MAU 1,000', 'チーム：2名採用', 'ケア事業：BtoB研修10社導入'],
-                    skill: ['講演：年20回'],
-                    artist: ['写真展：第3回', 'ドラム：バンド加入 or 結成'],
-                    life: ['バイク購入・ツーリング開始', '海外：3回']
+                    business: [
+                        { title: 'yohaku：月商300万円達成', details: ['高単価サービスの拡充', 'リカーリング収益の構築', '法人向けサービス開始'] },
+                        { title: 'yohaku App：ローンチ、MAU 1,000', details: ['β版フィードバック反映', 'マーケティング施策実行', 'ユーザーコミュニティ形成'] },
+                        { title: 'チーム：2名採用', details: ['採用基準の明確化', '業務委託から正社員化検討', 'オンボーディング体制構築'] },
+                        { title: 'ケア事業：BtoB研修10社導入', details: ['法人営業体制構築', '研修プログラム標準化', '成果測定の仕組み化'] }
+                    ],
+                    skill: [
+                        { title: '講演：年20回', details: ['業界での認知拡大', '書籍出版の検討', 'メディア露出の増加'] }
+                    ],
+                    artist: [
+                        { title: '写真展：第3回', details: ['シリーズとしてのブランド確立', '作品集の出版検討', '海外ギャラリーへのアプローチ'] },
+                        { title: 'ドラム：バンド加入 or 結成', details: ['定期ライブ出演（月1回）', 'オリジナル曲制作', '音楽フェス出演を目標に'] }
+                    ],
+                    life: [
+                        { title: 'バイク購入・ツーリング開始', details: ['愛車選び・購入', '月1回のツーリング計画', 'ライダー仲間との交流'] },
+                        { title: '海外：3回', details: ['アジア・欧米・その他バランス', '写真撮影旅行として計画', '現地のアートシーン体験'] }
+                    ]
                 }
             },
             2029: {
@@ -1057,10 +1194,23 @@
                     { q: 'Q4', period: '10-12月', revenue: '490→500万', cumulative: '5,380万', events: '第4回写真展（海外検討）' }
                 ],
                 smartGoals: {
-                    business: ['yohaku：月商500万円達成', 'チーム：5名体制', 'yohaku App：MAU 5,000', 'ケア事業：SaaS化着手'],
-                    skill: ['講演：年30回（業界認知確立）'],
-                    artist: ['写真展：第4回（海外検討）', 'ドラム：自主企画ライブ開催'],
-                    life: ['バイクツーリング：国内制覇計画', '海外：3回以上']
+                    business: [
+                        { title: 'yohaku：月商500万円達成', details: ['サービス多角化', 'ストック収益50%以上', 'パートナー企業との連携'] },
+                        { title: 'チーム：5名体制', details: ['コアメンバーの育成', '役割分担の最適化', '組織文化の醸成'] },
+                        { title: 'yohaku App：MAU 5,000', details: ['機能拡充', 'プレミアムプラン導入', 'コミュニティ機能強化'] },
+                        { title: 'ケア事業：SaaS化着手', details: ['MVP開発', 'パイロットユーザー獲得', 'プロダクトマーケットフィット検証'] }
+                    ],
+                    skill: [
+                        { title: '講演：年30回（業界認知確立）', details: ['キーノートスピーカーとしての登壇', '書籍出版', 'メディア連載'] }
+                    ],
+                    artist: [
+                        { title: '写真展：第4回（海外検討）', details: ['海外ギャラリーとの交渉', '国際的な写真賞への応募', '作品集の海外流通'] },
+                        { title: 'ドラム：自主企画ライブ開催', details: ['企画・運営の経験', 'ゲストアーティスト招聘', 'ライブ映像制作'] }
+                    ],
+                    life: [
+                        { title: 'バイクツーリング：国内制覇計画', details: ['47都道府県制覇開始', '長距離ツーリングスキル向上', '旅の記録ブログ'] },
+                        { title: '海外：3回以上', details: ['ビジネス視察も兼ねた渡航', '写真撮影×観光×学び', '現地でのネットワーク構築'] }
+                    ]
                 }
             },
             2030: {
@@ -1074,10 +1224,23 @@
                     { q: 'Q4', period: '10-12月', revenue: '720→800万', cumulative: '8,080万', events: '第5回写真展、年収1億達成' }
                 ],
                 smartGoals: {
-                    business: ['yohaku：年商1億円達成', 'チーム：10名体制', 'yohaku App：MAU 20,000', 'ケアSaaS：ARR 1,800万円'],
-                    skill: ['業界での認知：ケア×テクノロジーの第一人者'],
-                    artist: ['写真展：第5回（5年連続達成）', '音楽：アルバム制作 or 定期ライブ'],
-                    life: ['経済的自由の基盤確立', '海外：4回以上']
+                    business: [
+                        { title: 'yohaku：年商1億円達成', details: ['複数事業の安定収益化', 'M&A・事業提携の検討', '次世代経営体制の構築'] },
+                        { title: 'チーム：10名体制', details: ['マネージャー層の育成', '採用・育成の仕組み化', '働きがいのある組織文化'] },
+                        { title: 'yohaku App：MAU 20,000', details: ['グロース戦略の実行', '海外展開の検討', 'AI機能の強化'] },
+                        { title: 'ケアSaaS：ARR 1,800万円', details: ['プロダクト成熟', 'カスタマーサクセス体制', '大手企業への導入'] }
+                    ],
+                    skill: [
+                        { title: '業界での認知：ケア×テクノロジーの第一人者', details: ['業界団体での役職', 'メディア露出の常態化', '後進の育成・メンタリング'] }
+                    ],
+                    artist: [
+                        { title: '写真展：第5回（5年連続達成）', details: ['5年間の集大成としての大規模展示', '回顧的な作品集出版', '次の5年のビジョン発表'] },
+                        { title: '音楽：アルバム制作 or 定期ライブ', details: ['オリジナルアルバムのリリース', '定期的なライブ活動', '音楽と写真のコラボレーション'] }
+                    ],
+                    life: [
+                        { title: '経済的自由の基盤確立', details: ['資産運用の安定化', '複数の収入源確保', '時間と場所の自由'] },
+                        { title: '海外：4回以上', details: ['仕事と遊びの境界を超えた渡航', '長期滞在の検討', '国際的なネットワーク活用'] }
+                    ]
                 }
             }
         };
@@ -1225,7 +1388,15 @@
         function getDateKey() { return formatDate(currentDate); }
         function getWeekday(date) { return ['日', '月', '火', '水', '木', '金', '土'][date.getDay()]; }
         function showToast(msg = '保存しました') { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
-        
+
+        // SMART目標のアコーディオン開閉
+        function toggleSmartGoal(id) {
+            const item = document.getElementById('smart-' + id);
+            if (item) {
+                item.classList.toggle('open');
+            }
+        }
+
         function addMinutes(timeStr, minutes) {
             const [h, m] = timeStr.split(':').map(Number);
             const totalMinutes = h * 60 + m + minutes;
@@ -1251,6 +1422,50 @@
             return habits.reduce((sum, h) => sum + h.duration, 0);
         }
         
+        // 時間帯ごとの意識すべきこと
+        const TIME_MINDSETS = {
+            morning: {
+                title: '💡 朝の意識',
+                points: [
+                    '水分をしっかり摂る（白湯 or レモン水）',
+                    '最も集中力が高い時間 → 重要タスクを最優先',
+                    'インプット時間：余白新聞・読書に集中',
+                    '体を動かす：軽いストレッチで代謝UP'
+                ],
+                tip: '🎯 朝の1時間は夜の3時間に匹敵する。最重要タスクを先に。'
+            },
+            daytime: {
+                title: '💡 日中の意識',
+                points: [
+                    '14時間ファスティング終了 → 最初の食事は腸に優しく',
+                    'アウトプット時間：会議・創作・発信に注力',
+                    '90分サイクルで休憩を入れる（ポモドーロ）',
+                    '姿勢・呼吸を意識する（集中力維持）'
+                ],
+                tip: '🎯 「今日これだけは」を1つ決めて完遂する。'
+            },
+            evening: {
+                title: '💡 夕方の意識',
+                points: [
+                    '21時までに最後の食事を終える',
+                    '振り返りの時間：今日の成果と感謝を記録',
+                    '明日の準備：TODOの整理と優先順位付け',
+                    'デジタルデトックス開始の準備'
+                ],
+                tip: '🎯 今日1日で「できたこと」を3つ書き出す。'
+            },
+            night: {
+                title: '⚠️ 判断禁止ゾーン',
+                points: [
+                    '重要な意思決定は明日に回す',
+                    '食事・買い物・返信は控える',
+                    'ブルーライトカット → 睡眠の質を守る',
+                    'リラックスモード：読書・音楽・瞑想'
+                ],
+                tip: '🛑 夜の判断は後悔しやすい。疲れた脳で決めない。'
+            }
+        };
+
         function updateDateTime() {
             const now = new Date();
             document.getElementById('currentTime').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -1262,6 +1477,7 @@
             const nightStart = timeToMinutes(settings.nightStart || '22:00');     // 22:00
             
             const periodEl = document.getElementById('timePeriod');
+            const mindsetEl = document.getElementById('timeMindset');
             const morningSection = document.getElementById('morningSection');
             const daytimeSection = document.getElementById('daytimeSection');
             const eveningSection = document.getElementById('eveningSection');
@@ -1278,26 +1494,47 @@
             nightSection.classList.remove('highlighted');
             nightSection.style.background = '';
             
+            let currentMindset = null;
+            
             if (currentMinutes >= morningStart && currentMinutes < daytimeStart) {
                 periodEl.textContent = '🌅 朝のルーティン（ファスティング中）';
                 periodEl.classList.add('morning');
                 morningSection.classList.add('highlighted');
+                currentMindset = TIME_MINDSETS.morning;
+                mindsetEl.style.borderColor = 'var(--accent-gold)';
             } else if (currentMinutes >= daytimeStart && currentMinutes < eveningStart) {
                 periodEl.textContent = '☀️ 日中（食事OK 11:00-21:00）';
                 periodEl.style.background = 'var(--accent-sage-dim)';
                 periodEl.style.color = 'var(--accent-sage)';
                 daytimeSection.classList.add('highlighted');
                 daytimeSection.style.background = 'var(--accent-sage-dim)';
+                currentMindset = TIME_MINDSETS.daytime;
+                mindsetEl.style.borderColor = 'var(--accent-sage)';
             } else if (currentMinutes >= eveningStart && currentMinutes < nightStart) {
                 periodEl.textContent = '🌆 夕方（夕食は21時まで）';
                 periodEl.classList.add('evening');
                 eveningSection.classList.add('highlighted', 'evening');
+                currentMindset = TIME_MINDSETS.evening;
+                mindsetEl.style.borderColor = 'var(--accent-blue)';
             } else if (currentMinutes >= nightStart || currentMinutes < morningStart) {
                 periodEl.textContent = '🌙 判断禁止ゾーン（ノンカロリーのみ）';
                 periodEl.style.background = 'rgba(139, 92, 246, 0.15)';
                 periodEl.style.color = '#8b5cf6';
                 nightSection.classList.add('highlighted');
                 nightSection.style.background = 'rgba(139, 92, 246, 0.15)';
+                currentMindset = TIME_MINDSETS.night;
+                mindsetEl.style.borderColor = '#8b5cf6';
+            }
+            
+            // 意識すべきことを更新
+            if (currentMindset) {
+                mindsetEl.innerHTML = `
+                    <div class="time-mindset-title">${currentMindset.title}</div>
+                    <ul class="time-mindset-list">
+                        ${currentMindset.points.map(p => `<li>${p}</li>`).join('')}
+                    </ul>
+                    <div class="time-mindset-tip">${currentMindset.tip}</div>
+                `;
             }
             
             updateTheme();
@@ -1327,7 +1564,6 @@
             const month = currentDate.getMonth() + 1;
             const data = MONTHS[month];
             document.getElementById('monthTheme').textContent = data.theme;
-            document.getElementById('monthRevenue').textContent = `¥${data.revenue}`;
             document.getElementById('monthQuote').textContent = data.quote;
         }
 
@@ -1681,13 +1917,41 @@
                     </div>
                 `).join('')}
                 
-                <div class="section-title" style="margin: 20px 0 12px;">SMART目標</div>
+                <div class="section-title" style="margin: 20px 0 12px;">SMART目標 <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">（タップで詳細表示）</span></div>
                 <div class="plan-year-card">
                     ${Object.entries(y.smartGoals).map(([category, goals]) => `
                         <div class="plan-section" style="margin-top: 0; padding-top: 0; border-top: none;">
                             <div class="plan-section-title">${{business: '💼 事業・キャリア', skill: '📚 スキル・学習', artist: '🎨 アーティスト活動', life: '🌱 生活'}[category]}</div>
                             <div class="plan-milestones">
-                                ${goals.map(g => `<div class="plan-milestone"><div class="plan-milestone-dot"></div><div class="plan-milestone-text">${g}</div></div>`).join('')}
+                                ${goals.map((g, idx) => {
+                                    const title = typeof g === 'string' ? g : g.title;
+                                    const details = typeof g === 'string' ? [] : (g.details || []);
+                                    const uniqueId = category + '-' + idx;
+                                    return `
+                                        <div class="smart-goal-item" id="smart-${uniqueId}">
+                                            <div class="smart-goal-header" onclick="toggleSmartGoal('${uniqueId}')">
+                                                <div class="smart-goal-dot"></div>
+                                                <div class="smart-goal-title">${title}</div>
+                                                ${details.length > 0 ? `
+                                                    <div class="smart-goal-toggle">
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <polyline points="6 9 12 15 18 9"/>
+                                                        </svg>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            ${details.length > 0 ? `
+                                                <div class="smart-goal-details">
+                                                    <div class="smart-goal-details-inner">
+                                                        <ul class="smart-goal-details-list">
+                                                            ${details.map(d => '<li>' + d + '</li>').join('')}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     `).join('')}
@@ -1965,8 +2229,16 @@
             }
         }
         
-        // 再生成
+        // 再生成（当日のみ可能。過去日付は新しいニュースになってしまうため禁止）
         async function regenerateDailyPaper() {
+            const today = new Date();
+            const isToday = formatDate(today) === getDateKey();
+            
+            if (!isToday) {
+                showToast('⚠️ 過去の日付は再生成できません（新しいニュースになってしまうため）');
+                return;
+            }
+            
             await generateDailyPaper(true);
         }
         
@@ -2371,11 +2643,26 @@ ${newsText}
 - 各セクションの内容は相互に排他的であること
 - セクション分けはMECE（Mutually Exclusive, Collectively Exhaustive）を厳守
 
-## ⭐ 最優先キーワード処理（必須）
-以下のキーワードが含まれるニュースがある場合は、**他のセクションに含めず、必ず独立した専用セクションを作成**すること：
-1. **ヘラルボニー** - 1件でもあれば必ず「ヘラルボニー」専用セクションを作成
-2. **ピクシーダストテクノロジーズ** / **落合陽一** - 1件でもあれば専用セクションを作成
-※これらは最初に処理し、残りのニュースで他のセクションを構成する`;
+## ⭐ 最優先キーワード処理（必須・絶対遵守）
+
+以下の2社については、**必ず専用セクションを作成**すること。これは最も重要なルールです。
+
+### 1. ヘラルボニー（HERALBONY）
+- ニュースがある場合：「🎨 ヘラルボニー」専用セクションを作成し、ニュース内容を詳細に解説
+- **ニュースがない場合も必ず以下のセクションを作成**：
+  - タイトル：「🎨 ヘラルボニー定点観測」
+  - 内容：「本日のニュース検索では、ヘラルボニーに関する新着ニュースは確認されませんでした。」
+  - 加えて、読者への価値として：最近の動向のリマインド、または次に注目すべきポイントを簡潔に記載
+
+### 2. ピクシーダストテクノロジーズ / 落合陽一
+- ニュースがある場合：「🔬 ピクシーダストテクノロジーズ」専用セクションを作成し、ニュース内容を詳細に解説
+- **ニュースがない場合も必ず以下のセクションを作成**：
+  - タイトル：「🔬 ピクシーダストテクノロジーズ定点観測」
+  - 内容：「本日のニュース検索では、ピクシーダストテクノロジーズ（PxDT）および落合陽一氏に関する新着ニュースは確認されませんでした。」
+  - 加えて、読者への価値として：直近の事業展開や注目点を簡潔に記載
+
+※これら2社のセクションは**必ず新聞の冒頭付近（エグゼクティブサマリーの直後）**に配置すること
+※他のニュースとまとめず、必ず独立したセクションとして扱うこと`;
 
             console.log('GPT-4o 呼び出し開始...');
             console.log('プロンプト文字数:', prompt.length);
@@ -2632,15 +2919,21 @@ ${newsText}
                 // 余白新聞がある場合
                 titleEl.textContent = `${dateStr} の余白新聞`;
                 statusEl.textContent = `「${cachedPaper.content.headline || '余白新聞'}」`;
+                
+                // 再生成ボタンは当日のみ表示（過去日付は新しいニュースになってしまうため）
+                const regenerateButton = isToday ? `
+                    <button class="paper-generate-btn" onclick="regenerateDailyPaper()" style="margin-top: 8px; background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        再生成
+                    </button>
+                ` : '';
+                
                 actionArea.innerHTML = `
                     <button class="paper-generate-btn" onclick="showDailyPaper(window._cachedPaperContent, '${dateKey}')" style="background: linear-gradient(135deg, var(--accent-sage) 0%, #4a7050 100%);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         余白新聞を読む
                     </button>
-                    <button class="paper-generate-btn" onclick="regenerateDailyPaper()" style="margin-top: 8px; background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                        再生成
-                    </button>
+                    ${regenerateButton}
                 `;
                 // グローバルにキャッシュ
                 window._cachedPaperContent = cachedPaper.content;
