@@ -352,6 +352,11 @@
         .form-input:focus { border-color: var(--accent-gold); }
         .btn-primary { width: 100%; padding: 14px; background: var(--accent-gold); border: none; border-radius: var(--radius-md); color: white; font-family: var(--font-sans); font-size: 14px; font-weight: 500; cursor: pointer; }
         .btn-primary:hover { opacity: 0.9; }
+        
+        /* Theme Toggle */
+        .theme-toggle-btn { font-size: 13px; font-weight: 500; }
+        .theme-toggle-btn:hover { border-color: var(--accent-gold) !important; }
+        .theme-toggle-btn.active { background: var(--accent-gold) !important; color: white !important; border-color: var(--accent-gold) !important; }
 
         /* Calendar */
         .calendar { width: 100%; }
@@ -938,6 +943,25 @@
         </div>
         
         <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
+            <div class="settings-section-title">🌓 テーマ設定</div>
+            <div class="settings-item">
+                <div class="settings-item-label">表示モード</div>
+                <div class="settings-item-desc">自動は時間帯（6時〜18時: ライト、18時〜6時: ダーク）で切り替わります</div>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button class="theme-toggle-btn" data-theme="auto" onclick="setThemeMode('auto')" style="flex: 1; padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-medium); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                        🔄 自動
+                    </button>
+                    <button class="theme-toggle-btn" data-theme="light" onclick="setThemeMode('light')" style="flex: 1; padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-medium); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                        ☀️ ライト
+                    </button>
+                    <button class="theme-toggle-btn" data-theme="dark" onclick="setThemeMode('dark')" style="flex: 1; padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-medium); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                        🌙 ダーク
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
             <div class="settings-section-title">🔄 アプリの更新</div>
             <div class="settings-item">
                 <div class="settings-item-label">最新版に更新</div>
@@ -971,7 +995,7 @@
         // ============================================
         // APP VERSION
         // ============================================
-        const APP_VERSION = 'v3.7.0';
+        const APP_VERSION = 'v3.8.0';
         const APP_LAST_UPDATE = '2026-01-11';
         
         // ============================================
@@ -1283,11 +1307,48 @@
         // ============================================
         // THEME
         // ============================================
+        let themeMode = 'auto'; // 'auto', 'light', 'dark'
+        
         function updateTheme() {
-            const hour = new Date().getHours();
-            const isDark = hour >= 18 || hour < 6;
+            let isDark = false;
+            
+            if (themeMode === 'auto') {
+                const hour = new Date().getHours();
+                isDark = hour >= 18 || hour < 6;
+            } else {
+                isDark = themeMode === 'dark';
+            }
+            
             document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
             document.querySelector('meta[name="theme-color"]').content = isDark ? '#0d0d14' : '#faf9f7';
+            
+            // テーマ切り替えボタンの状態を更新
+            updateThemeToggleUI();
+        }
+        
+        function updateThemeToggleUI() {
+            const buttons = document.querySelectorAll('.theme-toggle-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.theme === themeMode) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        async function setThemeMode(mode) {
+            themeMode = mode;
+            await dbPut('settings', { id: 'themeMode', mode: mode });
+            updateTheme();
+            showToast(mode === 'auto' ? '自動テーマに設定' : mode === 'dark' ? 'ダークモードに設定' : 'ライトモードに設定');
+        }
+        
+        async function loadThemeSettings() {
+            const data = await dbGet('settings', 'themeMode');
+            if (data?.mode) {
+                themeMode = data.mode;
+            }
+            updateTheme();
         }
 
         // ============================================
@@ -2083,6 +2144,7 @@
             document.getElementById('appVersion').textContent = APP_VERSION;
             document.getElementById('appLastUpdate').textContent = APP_LAST_UPDATE;
             await loadApiKeys();
+            updateThemeToggleUI();
             document.getElementById('settingsModal').classList.add('active');
         }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
@@ -2188,9 +2250,9 @@
             statusEl.textContent = 'ニュースを取得しています...';
             
             try {
-                // Step 1: ニュースを取得（複数ソース）
-                console.log('Step 1: ニュース取得');
-                const newsArticles = await fetchNewsMultiSource(newsdataKeyData?.key, newsKeywords, statusEl);
+                // Step 1: ニュースを取得（複数ソース）- 指定日付のニュースを取得
+                console.log('Step 1: ニュース取得 (対象日付: ' + targetDate + ')');
+                const newsArticles = await fetchNewsMultiSource(newsdataKeyData?.key, newsKeywords, statusEl, targetDate);
                 
                 if (newsArticles.length === 0) {
                     throw new Error('ニュースを取得できませんでした。しばらく待ってから再試行してください。');
@@ -2229,61 +2291,83 @@
             }
         }
         
-        // 再生成（当日のみ可能。過去日付は新しいニュースになってしまうため禁止）
+        // 再生成（日付を指定してその日のニュースを再取得）
         async function regenerateDailyPaper() {
-            const today = new Date();
-            const isToday = formatDate(today) === getDateKey();
-            
-            if (!isToday) {
-                showToast('⚠️ 過去の日付は再生成できません（新しいニュースになってしまうため）');
-                return;
-            }
-            
             await generateDailyPaper(true);
         }
         
         // ==========================================
         // 複数ソースからニュースを取得
         // ==========================================
-        async function fetchNewsMultiSource(newsdataApiKey, keywords, statusEl) {
+        async function fetchNewsMultiSource(newsdataApiKey, keywords, statusEl, targetDate) {
             const allArticles = [];
             const seenTitles = new Set();
             
             console.log('=== マルチソース ニュース取得開始 ===');
             console.log('キーワード:', keywords);
+            console.log('対象日付:', targetDate);
             
-            // ソース1: NewsData.io API（APIキーがある場合）
+            // ソース1: NewsData.io API（APIキーがある場合）- 日付指定可能
             if (newsdataApiKey) {
                 statusEl.textContent = 'NewsData.io からニュースを取得中...';
-                const newsDataArticles = await fetchFromNewsDataIO(newsdataApiKey, keywords, seenTitles);
+                const newsDataArticles = await fetchFromNewsDataIO(newsdataApiKey, keywords, seenTitles, targetDate);
                 allArticles.push(...newsDataArticles);
                 console.log(`NewsData.io: ${newsDataArticles.length}件`);
             }
             
-            // ソース2: Google News RSS（常に試行）
+            // ソース2: Google News RSS（常に試行）- 日付フィルタリング
             if (allArticles.length < 20) {
                 statusEl.textContent = 'Google News RSS からニュースを取得中...';
-                const rssArticles = await fetchFromGoogleNewsRSS(keywords, seenTitles);
+                const rssArticles = await fetchFromGoogleNewsRSS(keywords, seenTitles, targetDate);
                 allArticles.push(...rssArticles);
                 console.log(`Google News RSS: ${rssArticles.length}件`);
             }
             
             console.log(`=== ニュース取得完了: 合計${allArticles.length}件 ===`);
             
-            // 最新順にソート
-            allArticles.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+            // 日付でフィルタリング（対象日付の前後1日まで許容）
+            const targetDateObj = new Date(targetDate);
+            const startOfDay = new Date(targetDateObj);
+            startOfDay.setDate(startOfDay.getDate() - 1);
+            const endOfDay = new Date(targetDateObj);
+            endOfDay.setDate(endOfDay.getDate() + 1);
             
-            return allArticles;
+            const filteredArticles = allArticles.filter(article => {
+                if (!article.publishedAt) return true; // 日付なしは許容
+                const pubDate = new Date(article.publishedAt);
+                return pubDate >= startOfDay && pubDate <= endOfDay;
+            });
+            
+            console.log(`日付フィルタ後: ${filteredArticles.length}件（${targetDate}±1日）`);
+            
+            // フィルタ後の記事が少ない場合は全記事を使用
+            const finalArticles = filteredArticles.length >= 5 ? filteredArticles : allArticles;
+            
+            // 最新順にソート
+            finalArticles.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+            
+            return finalArticles;
         }
         
-        // NewsData.io からニュース取得
-        async function fetchFromNewsDataIO(apiKey, keywords, seenTitles) {
+        // NewsData.io からニュース取得（日付指定対応）
+        async function fetchFromNewsDataIO(apiKey, keywords, seenTitles, targetDate) {
             const articles = [];
+            
+            // 対象日付が今日かどうかで使用するAPIを切り替え
+            const today = formatDate(new Date());
+            const isToday = targetDate === today;
+            
+            // 日付パラメータを構築（過去の日付の場合はArchive APIを使用）
+            // NewsData.io: from_date, to_date は YYYY-MM-DD 形式
+            const dateParam = isToday ? '' : `&from_date=${targetDate}&to_date=${targetDate}`;
+            const apiEndpoint = isToday ? 'latest' : 'archive';
+            
+            console.log(`[NewsData.io] API: ${apiEndpoint}, 日付: ${targetDate}`);
             
             // 日本のトップニュース
             try {
                 console.log('[NewsData.io] トップニュース取得中...');
-                const topUrl = `https://newsdata.io/api/1/latest?apikey=${apiKey}&language=ja&country=jp`;
+                const topUrl = `https://newsdata.io/api/1/${apiEndpoint}?apikey=${apiKey}&language=ja&country=jp${dateParam}`;
                 const response = await fetch(topUrl, { signal: AbortSignal.timeout(15000) });
                 
                 if (response.ok) {
@@ -2300,23 +2384,31 @@
                                     content: item.content || item.description || '',
                                     source: item.source_name || item.source_id || '不明',
                                     publishedAt: item.pubDate,
-                                    url: item.link
+                                    url: item.link,
+                                    image_url: item.image_url || ''
                                 });
                             }
                         });
                     }
                 } else {
-                    console.warn('[NewsData.io] トップニュース取得失敗:', response.status);
+                    const errorData = await response.json().catch(() => ({}));
+                    console.warn('[NewsData.io] トップニュース取得失敗:', response.status, errorData.results?.message || '');
                 }
             } catch (e) {
                 console.warn('[NewsData.io] トップニュース取得エラー:', e.message);
             }
             
-            // 各キーワードで検索（最大3キーワード）
-            for (const keyword of keywords.slice(0, 3)) {
+            // 各キーワードで検索（最大5キーワード - パーソナライズ重視）
+            const priorityKeywords = ['ヘラルボニー', 'ピクシーダストテクノロジーズ', '落合陽一'];
+            const sortedKeywords = [
+                ...priorityKeywords.filter(k => keywords.includes(k)),
+                ...keywords.filter(k => !priorityKeywords.includes(k))
+            ];
+            
+            for (const keyword of sortedKeywords.slice(0, 5)) {
                 try {
                     console.log(`[NewsData.io] "${keyword}" 検索中...`);
-                    const searchUrl = `https://newsdata.io/api/1/latest?apikey=${apiKey}&q=${encodeURIComponent(keyword)}&language=ja`;
+                    const searchUrl = `https://newsdata.io/api/1/${apiEndpoint}?apikey=${apiKey}&q=${encodeURIComponent(keyword)}&language=ja${dateParam}`;
                     const response = await fetch(searchUrl, { signal: AbortSignal.timeout(15000) });
                     
                     if (response.ok) {
@@ -2333,7 +2425,8 @@
                                         content: item.content || item.description || '',
                                         source: item.source_name || item.source_id || '不明',
                                         publishedAt: item.pubDate,
-                                        url: item.link
+                                        url: item.link,
+                                        image_url: item.image_url || ''
                                     });
                                 }
                             });
@@ -2348,8 +2441,8 @@
             return articles;
         }
         
-        // Google News RSS からニュース取得（フォールバック）
-        async function fetchFromGoogleNewsRSS(keywords, seenTitles) {
+        // Google News RSS からニュース取得（フォールバック）- 日付フィルタリング付き
+        async function fetchFromGoogleNewsRSS(keywords, seenTitles, targetDate) {
             const articles = [];
             
             // RSS2JSONとAllOriginsの両方を試す
@@ -2920,20 +3013,18 @@ ${newsText}
                 titleEl.textContent = `${dateStr} の余白新聞`;
                 statusEl.textContent = `「${cachedPaper.content.headline || '余白新聞'}」`;
                 
-                // 再生成ボタンは当日のみ表示（過去日付は新しいニュースになってしまうため）
-                const regenerateButton = isToday ? `
-                    <button class="paper-generate-btn" onclick="regenerateDailyPaper()" style="margin-top: 8px; background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                        再生成
-                    </button>
-                ` : '';
+                // 再生成ボタン（過去日付はその日のニュースで再生成）
+                const regenerateLabel = isToday ? '再生成' : `${dateStr}のニュースで再生成`;
                 
                 actionArea.innerHTML = `
                     <button class="paper-generate-btn" onclick="showDailyPaper(window._cachedPaperContent, '${dateKey}')" style="background: linear-gradient(135deg, var(--accent-sage) 0%, #4a7050 100%);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         余白新聞を読む
                     </button>
-                    ${regenerateButton}
+                    <button class="paper-generate-btn" onclick="regenerateDailyPaper()" style="margin-top: 8px; background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        ${regenerateLabel}
+                    </button>
                 `;
                 // グローバルにキャッシュ
                 window._cachedPaperContent = cachedPaper.content;
@@ -3074,10 +3165,10 @@ ${newsText}
 
         async function init() {
             try {
-                updateTheme();
                 await initDB();
                 await migrateHabitData(); // データマイグレーション
                 await loadSettings();
+                await loadThemeSettings(); // テーマ設定を読み込み
                 await loadKeywords();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
